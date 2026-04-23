@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: prefeitura_db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: prefeitura_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: prefeitura_api
+    environment:
+      - DATABASE_URL=postgresql://root:rootpassword@db:5432/prefeitura_db?schema=public
+      - JWT_SECRET=super_secret_painel_2024
+      - PORT=3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: prefeitura_web
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

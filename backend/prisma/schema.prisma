@@ -1,0 +1,56 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Child {
+  id              String   @id @default(uuid())
+  originalId      String   @unique
+  nome            String
+  data_nascimento DateTime
+  bairro          String
+  responsavel     String
+
+  saude              HealthData?
+  educacao           EducationData?
+  assistencia_social SocialData?
+
+  revisado      Boolean   @default(false)
+  revisado_por  String?
+  revisado_em   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HealthData {
+  id              String   @id @default(uuid())
+  childId         String   @unique
+  child           Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  ultima_consulta DateTime
+  vacinas_em_dia  Boolean
+  alertas         String[]
+}
+
+model EducationData {
+  id                 String   @id @default(uuid())
+  childId            String   @unique
+  child              Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  escola             String?
+  frequencia_percent Float?
+  alertas            String[]
+}
+
+model SocialData {
+  id              String   @id @default(uuid())
+  childId         String   @unique
+  child           Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  cad_unico       Boolean
+  beneficio_ativo Boolean
+  alertas         String[]
+}

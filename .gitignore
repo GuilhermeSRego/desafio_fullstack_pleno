@@ -1,0 +1,6 @@
+.agents
+.agents/
+agentes
+agentes/
+node_modules
+.DS_Store
