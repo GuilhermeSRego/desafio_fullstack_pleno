@@ -1,83 +1,194 @@
 # Painel de Monitoramento Infantil — Prefeitura do Rio de Janeiro
 
-Este projeto é um sistema full-stack desenvolvido para apoiar técnicos de campo no acompanhamento de crianças em situação de vulnerabilidade, integrando dados de Saúde, Educação e Assistência Social.
+Sistema full-stack desenvolvido para apoiar técnicos de campo no acompanhamento de crianças em situação de vulnerabilidade social, integrando dados de **Saúde**, **Educação** e **Assistência Social**.
 
-## 🚀 Justificativa das Tecnologias e Bibliotecas
-
-### Backend (Node.js + Express + TypeScript)
-- **Por que Node.js?**: Escolhido pela alta eficiência em operações de I/O e pela facilidade de compartilhar a tipagem do TypeScript com o frontend. A agilidade no processamento de requisições assíncronas é ideal para uma API de monitoramento.
-- **Prisma ORM + PostgreSQL**: O PostgreSQL garante a integridade relacional necessária para cruzar dados de diferentes secretarias. O Prisma foi selecionado por fornecer um cliente tipado (Type-safe), reduzindo erros de runtime e facilitando migrações automatizadas.
-- **JWT (JsonWebToken)**: Utilizado para garantir a segurança no acesso aos dados sensíveis, seguindo o padrão de autenticação stateless.
-
-### Frontend (Next.js 14 + TypeScript)
-- **Por que Next.js?**: O App Router permite utilizar Server Components para busca de dados eficiente e menor carga de JS no cliente, resultando em uma aplicação extremamente rápida em dispositivos móveis.
-- **Tailwind CSS**: Escolhido por permitir uma prototipagem de UI rápida e consistente. Sua abordagem utility-first garante que o CSS gerado seja otimizado e fácil de manter.
-- **shadcn/ui**: Biblioteca de componentes de alta qualidade baseada em Radix UI. Foi escolhida pelo foco em acessibilidade e por permitir total controle sobre o código dos componentes.
-
-### Visualização e Mapas
-- **Leaflet**: Biblioteca leve e extensiva para visualização geoespacial. Essencial para o requisito de Mapa de Calor sem sobrecarregar o navegador do técnico.
-- **Recharts**: Selecionada pela integração com o ecossistema do Next.js e pela excelente responsividade dos gráficos, facilitando a visualização de dados complexos em telas pequenas.
+A aplicação permite identificar rapidamente casos críticos, inconsistências cadastrais e acompanhar a evolução dos atendimentos — com foco em **performance, usabilidade mobile e clareza operacional**.
 
 ---
 
-## 🔍 Insights Técnicos e Funcionalidades
+## 🎯 Objetivo do Projeto
 
-### 1. Detecção Inteligente de Inconsistências
-O sistema analisa os dados brutos para identificar "lacunas silenciosas" (crianças sem alertas mas com dados pendentes):
-- **Análise Proativa**: Identifica quando faltam dados essenciais (escola, frequência, vacinas) que não dispararam alertas automáticos.
-- **Sugestão Técnica**: O backend sugere o alerta apropriado, guiando o técnico na regularização do caso.
+Construir um painel funcional que permita:
 
-### 2. Edição e Resolução Dinâmica
-- **Recálculo em Tempo Real**: Ao salvar uma edição (PATCH), a API reavalia as regras de negócio. Se o técnico regularizar um dado (ex: atualizar escola), o alerta de inconsistência é removido automaticamente do dashboard.
-- **Comparativo de Evolução**: No detalhe da criança, um gráfico ilustra a melhora ou piora dos indicadores após o acompanhamento.
-
-### 3. Responsividade e UX Móvel (Table-to-Cards)
-- **Transformação Automática**: Em telas menores (mobile), as tabelas densas são convertidas em cartões verticais (Cards) interativos para evitar scroll horizontal.
-- **Filtros Adaptativos**: Os filtros e o menu de abas (Tabs) possuem rolagem horizontal otimizada para toque.
-
-### 4. Acessibilidade e Design System
-- **Navegação por Teclado**: Ordem de tabulação lógica e focos visíveis em todos os elementos.
-- **Dark Mode**: Implementado via `next-themes` para reduzir fadiga visual.
-- **Tags Semânticas**: Uso rigoroso de HTML5 (main, nav, section, aria-labels).
+- Identificar crianças com **alertas ativos**
+- Detectar **lacunas de dados (inconsistências)**
+- Apoiar decisões rápidas no dia a dia do técnico
+- Registrar e acompanhar **revisões de casos**
 
 ---
 
-## 🐳 Como Rodar o Projeto (Docker)
+## 🧱 Arquitetura da Solução
 
-O projeto é 100% conteinerizado via **Docker Compose**.
+A aplicação segue uma arquitetura **full-stack desacoplada**, dividida em:
 
-1. **Clone o repositório** e acesse a pasta raiz.
-2. **Execute o comando**:
+- **Backend (API REST)** → Regras de negócio, autenticação e persistência  
+- **Frontend (Next.js)** → Interface, UX e consumo da API  
+- **Banco de Dados (PostgreSQL)** → Armazenamento relacional  
+- **Docker Compose** → Orquestração do ambiente  
+
+---
+
+## 🚀 Tecnologias Utilizadas
+
+### 🔙 Backend — Node.js + Express + TypeScript
+
+- **Node.js**: Alta performance em operações assíncronas, ideal para APIs escaláveis.
+- **TypeScript**: Tipagem forte, resultando em menos erros em runtime e compartilhamento de contratos com frontend.
+- **Prisma ORM + PostgreSQL**: Integridade relacional entre áreas, migrations automatizadas e cliente Type-safe.
+- **JWT (JsonWebToken)**: Autenticação stateless com token contendo `preferred_username`.
+
+### 🎨 Frontend — Next.js 14 + TypeScript
+
+- **Next.js (App Router)**: Server Components para melhor performance e menor carga de JS no cliente.
+- **Tailwind CSS**: Estilização rápida e consistente com CSS otimizado.
+- **shadcn/ui**: Componentes acessíveis e modernos sem vendor lock-in.
+
+### 📊 Visualização de Dados
+
+- **Recharts**: Gráficos responsivos (Bar, Donut, Radar).
+- **Leaflet + Marker Cluster**: Mapa interativo com agrupamento (base para heatmap).
+
+### 🧰 Bibliotecas Auxiliares
+
+- `date-fns`: Manipulação de datas.
+- `lucide-react`: Iconografia.
+- `clsx` & `tailwind-merge`: Utilidades de CSS.
+- `next-themes`: Gestão de temas (Dark Mode).
+
+---
+
+## 🔌 API — Endpoints
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST   | `/auth/token`           | Autenticação e retorno do JWT |
+| GET    | `/children`             | Lista com filtros e paginação |
+| GET    | `/children/:id`         | Detalhe completo da criança |
+| GET    | `/summary`              | Dados agregados do dashboard |
+| PATCH  | `/children/:id/review`  | Registra revisão técnica |
+
+---
+
+## 🧠 Regras de Negócio e Funcionalidades
+
+### 🔍 Detecção de Inconsistências
+Identifica automaticamente lacunas silenciosas:
+- Criança sem escola informada.
+- Vacinas pendentes ou atrasadas.
+- Dados incompletos em secretarias específicas.
+O sistema sugere ações corretivas mesmo sem alerta oficial disparado.
+
+### 🔄 Reavaliação Automática
+Ao editar dados (PATCH), a API reprocessa as regras de negócio em tempo real, removendo alertas ou inconsistências automaticamente assim que o dado é regularizado.
+
+### 📈 Dashboard Inteligente
+- **Cards Interativos**: Funcionam como filtros rápidos para a listagem.
+- **Análise Territorial**: Gráficos por área e bairro para identificar zonas de risco.
+- **Navegação Contextual**: Integração total entre visão macro (dashboard) e micro (prontuário).
+
+### ❤️ Medidor de Vitalidade (HP Bar)
+Visualização gamificada do status de vulnerabilidade:
+- 🟢 **Verde**: Regular.
+- 🟠 **Atenção**: Alertas pontuais.
+- 🔴 **Crítico**: Múltiplos alertas ou pendências graves.
+Inconsistências aparecem como um overlay visual pulsante sobre a barra.
+
+### 🏫 Filtro por Escolas
+Filtro multi-select que permite organizar o trabalho de campo por instituição de ensino.
+
+---
+
+## 📱 Responsividade e UX
+
+- **Mobile-First**: Interface otimizada de 375px a 1440px.
+- **Table-to-Cards**: Conversão automática de tabelas em cards verticais no mobile.
+- **Touch-Friendly**: Filtros e menus otimizados para navegação por toque.
+- **Modais Adaptativos**: Integração fluida entre o mapa e as listas de detalhes.
+
+---
+
+## ♿ Acessibilidade e Design
+
+- Navegação completa por teclado.
+- Uso rigoroso de `aria-labels` e HTML semântico.
+- Conformidade com **WCAG AA**.
+- **Dark Mode** nativo para redução de fadiga visual.
+
+---
+
+## 🐳 Como Rodar o Projeto
+
+### Pré-requisitos
+- Docker & Docker Compose instalados.
+
+### Execução
+1. Clone o repositório.
+2. Na raiz do projeto, execute:
    ```bash
    docker compose up --build -d
    ```
-3. **Acesso**:
-   - **Frontend**: [http://localhost:3000](http://localhost:3000)
-   - **Backend API**: [http://localhost:3001](http://localhost:3001)
 
-### Inicialização Automática
-O container `api` executa automaticamente as migrações do Prisma e o script de `seed` para popular o banco com as 25 crianças do `seed.json`.
+### Acessos
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **API**: [http://localhost:3001](http://localhost:3001)
+
+### ⚙️ Inicialização
+- O container executa migrations do Prisma automaticamente.
+- O banco é populado com o `seed.json` (25 crianças) no primeiro boot.
 
 ---
 
-## 🔑 Credenciais de Teste (Usuário Técnico)
-
+## 🔐 Credenciais de Teste
 - **Login**: `tecnico@prefeitura.rio`
 - **Senha**: `painel@2024`
 
 ---
 
-## 🛠️ O que foi implementado
+## 📊 Status de Implementação
 
-- [x] Login JWT com proteção de rotas via Middleware.
-- [x] Dashboard com indicadores de resumo e gráficos de rosca/barras.
-- [x] Listagem com filtros de Bairro, Alertas (Multi-select), Revisão e Nome.
-- [x] Ordenação dinâmica por Nome, Bairro, Idade e Volume de Alertas.
-- [x] Detecção de inconsistências cadastrais com sugestão de correção.
-- [x] Mapa de calor (Heatmap) por densidade de alertas nos bairros.
-- [x] Edição completa de dados com resolução automática de alertas.
-- [x] Ação de "Marcar como Revisado" com feedback visual.
-- [x] Dark Mode e conformidade com WCAG AA.
+- [x] Autenticação JWT
+- [x] Dashboard com gráficos dinâmicos
+- [x] Filtros avançados (Bairro, Escola, Alertas, Revisão)
+- [x] Paginação e ordenação no servidor
+- [x] Detecção inteligente de inconsistências
+- [x] Mapa de calor e agrupamento de marcadores
+- [x] Edição de dados com atualização de status em tempo real
+- [x] Registro de revisão técnica
+- [x] Responsividade completa
+- [x] Dark Mode e Acessibilidade (WCAG AA)
 
 ---
-**Desafio Técnico — Full-stack Pleno**
+
+## ⚖️ Decisões Arquiteturais
+
+- **Node.js vs Go**: Optei por Node.js para garantir maior produtividade e integração total de tipos com o frontend (TS), priorizando agilidade na entrega dos requisitos complexos de UI.
+- **Prisma vs SQL**: O Prisma foi escolhido pela segurança de tipos e velocidade de desenvolvimento, facilitando a manutenção das relações entre as áreas de saúde, educação e social.
+- **Server Components**: Uso estratégico para reduzir o "hydration cost" no cliente, mantendo a aplicação leve para dispositivos móveis simples.
+
+---
+
+## 🧪 Cenários Tratados (Edge Cases)
+- Crianças sem dados em sistemas específicos (saúde/social/educação).
+- Dados parciais ou inconsistentes (ex: idade vs data de nascimento).
+- Acúmulo de alertas múltiplos em todas as áreas simultaneamente.
+- Resolução automática de inconsistências após edição de dados.
+
+---
+
+## 🚀 Diferenciais do Projeto
+1. **Inteligência de Dados**: Sugestão automática de ações baseada em inconsistências silenciosas.
+2. **Visualização Avançada**: Gráfico Radar para perfil de vulnerabilidade + Heatmap territorial.
+3. **UX de Campo**: Pensado para o técnico que usa o celular na rua (cards, botões grandes, contraste alto).
+4. **Pronto para Produção**: Dockerizado, documentado e preparado para deploy (Vercel/Railway).
+
+---
+
+## 🔮 Melhorias Futuras
+- Implementação de Testes E2E com Playwright.
+- Cache de consultas pesadas com Redis.
+- Atualizações em tempo real via WebSockets.
+- Auditoria completa de alterações nos prontuários.
+
+---
+
+**Desafio Técnico — Full-stack Pleno 🚀**
