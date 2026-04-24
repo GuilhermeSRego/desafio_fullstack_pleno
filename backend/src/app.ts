@@ -134,15 +134,45 @@ app.get('/summary', authenticateToken, async (req: Request, res: Response) => {
       .slice(0, 5);
 
     // Inconsistencies analysis
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const inconsistencies = allChildren.filter(c => getInconsistenciesForChild(c));
 
-    const inconsistencies = allChildren.filter(c => {
-      const missingSchool = !c.educacao?.escola || c.educacao.escola === "Não informado";
-      const zeroFreq = c.educacao?.frequencia_percent === 0 && !c.educacao.alertas.includes('frequencia_baixa');
-      const oldConsult = c.saude?.ultima_consulta && new Date(c.saude.ultima_consulta) < sixMonthsAgo && !c.saude.alertas.includes('consulta_atrasada');
-      const missingBasic = !c.bairro || !c.responsavel;
-      return missingSchool || zeroFreq || oldConsult || missingBasic;
+    // Neighborhood stats for Radar and Stacked Charts
+    const neighborhoodStatsMap: Record<string, { 
+      neighborhood: string, 
+      alerts: number, 
+      inconsistencies: number,
+      health: number,
+      education: number,
+      social: number,
+      totalChildren: number
+    }> = {};
+    allChildren.forEach(c => {
+      const bairro = c.bairro || 'Não informado';
+      if (!neighborhoodStatsMap[bairro]) {
+        neighborhoodStatsMap[bairro] = { 
+          neighborhood: bairro, 
+          alerts: 0, 
+          inconsistencies: 0,
+          health: 0,
+          education: 0,
+          social: 0,
+          totalChildren: 0
+        };
+      }
+      
+      neighborhoodStatsMap[bairro].totalChildren++;
+      
+      const h = c.saude?.alertas?.length || 0;
+      const e = c.educacao?.alertas?.length || 0;
+      const s = c.assistencia_social?.alertas?.length || 0;
+
+      if (h > 0) neighborhoodStatsMap[bairro].health++;
+      if (e > 0) neighborhoodStatsMap[bairro].education++;
+      if (s > 0) neighborhoodStatsMap[bairro].social++;
+      
+      if (h > 0 || e > 0 || s > 0) neighborhoodStatsMap[bairro].alerts++;
+      
+      if (getInconsistenciesForChild(c)) neighborhoodStatsMap[bairro].inconsistencies++;
     });
 
     res.json({
@@ -152,7 +182,9 @@ app.get('/summary', authenticateToken, async (req: Request, res: Response) => {
       socialAlerts,
       reviewed,
       criticalCases,
-      inconsistencyCount: inconsistencies.length
+      inconsistencyCount: inconsistencies.length,
+      neighborhoodStats: Object.values(neighborhoodStatsMap),
+      schools: Array.from(new Set(allChildren.map(c => c.educacao?.escola).filter(s => s && s !== 'Não informado'))).sort()
     });
   } catch (error) {
     console.error(error);
@@ -203,7 +235,10 @@ app.get('/children', authenticateToken, async (req: Request, res: Response) => {
       revisado, 
       sortBy, 
       order = 'asc',
-      alertas // multi-select filter (comma separated or multiple params)
+      alertas,
+      escolas,
+      temInconsistencia, // Novo filtro para inconsistências
+      area // Novo filtro por área (saude, educacao, social)
     } = req.query;
     
     const pageNumber = parseInt(page as string);
@@ -216,6 +251,19 @@ app.get('/children', authenticateToken, async (req: Request, res: Response) => {
     }
     if (nome) {
       where.nome = { contains: nome as string, mode: 'insensitive' };
+    }
+    if (area === 'saude') {
+      where.saude = { alertas: { isEmpty: false } };
+    } else if (area === 'educacao') {
+      where.educacao = { alertas: { isEmpty: false } };
+    } else if (area === 'social') {
+      where.assistencia_social = { alertas: { isEmpty: false } };
+    }
+    if (escolas) {
+      const escolasArray = Array.isArray(escolas) ? escolas : (escolas as string).split(',');
+      where.educacao = {
+        escola: { in: escolasArray as string[], mode: 'insensitive' }
+      };
     }
     if (revisado !== undefined && revisado !== '' && revisado !== 'all') {
       where.revisado = revisado === 'true';
@@ -266,8 +314,8 @@ app.get('/children', authenticateToken, async (req: Request, res: Response) => {
 
     let data = await prisma.child.findMany({
       where,
-      skip: sortBy === 'alertas' ? undefined : skip,
-      take: sortBy === 'alertas' ? undefined : limitNumber,
+      skip: (sortBy === 'alertas' || temInconsistencia === 'true') ? undefined : skip,
+      take: (sortBy === 'alertas' || temInconsistencia === 'true') ? undefined : limitNumber,
       include: {
         saude: true,
         educacao: true,
@@ -276,7 +324,16 @@ app.get('/children', authenticateToken, async (req: Request, res: Response) => {
       orderBy
     });
 
-    const total = await prisma.child.count({ where });
+    let total = await prisma.child.count({ where });
+
+    if (temInconsistencia === 'true') {
+      data = data.filter(c => !!getInconsistenciesForChild(c));
+      total = data.length;
+      // Paginação manual para inconsistências se necessário
+      if (sortBy !== 'alertas') {
+        data = data.slice(skip, skip + limitNumber);
+      }
+    }
 
     if (sortBy === 'alertas') {
       data = data.sort((a, b) => {

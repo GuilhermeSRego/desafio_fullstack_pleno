@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import Navbar from '@/components/Navbar';
@@ -17,7 +18,14 @@ import {
 } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 
-export default function ChildrenList() {
+function ChildrenListContent() {
+  const searchParams = useSearchParams();
+  const initialRevisado = searchParams.get('revisado') || 'all';
+  const initialTemAlertas = searchParams.get('temAlertas') || 'all';
+  const initialAlertas = searchParams.get('alertas')?.split(',').filter(Boolean) || [];
+  const initialArea = searchParams.get('area') || 'all';
+  const initialTemInconsistencia = searchParams.get('temInconsistencia') || 'all';
+
   const [data, setData] = useState<any[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 10, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -25,9 +33,26 @@ export default function ChildrenList() {
   // Filtros
   const [bairro, setBairro] = useState('');
   const [nome, setNome] = useState('');
-  const [temAlertas, setTemAlertas] = useState('all');
-  const [revisado, setRevisado] = useState('all');
-  const [selectedAlerts, setSelectedAlerts] = useState<string[]>([]);
+  const [temAlertas, setTemAlertas] = useState(initialTemAlertas);
+  const [revisado, setRevisado] = useState(initialRevisado);
+  const [selectedAlerts, setSelectedAlerts] = useState<string[]>(initialAlertas);
+  const [selectedSchools, setSelectedSchools] = useState<string[]>([]);
+  const [availableSchools, setAvailableSchools] = useState<string[]>([]);
+  const [area, setArea] = useState(initialArea);
+  const [temInconsistencia, setTemInconsistencia] = useState(initialTemInconsistencia);
+
+  const hasActiveFilters = bairro || nome || temAlertas !== 'all' || revisado !== 'all' || selectedAlerts.length > 0 || selectedSchools.length > 0 || area !== 'all' || temInconsistencia !== 'all';
+
+  const clearFilters = () => {
+    setBairro('');
+    setNome('');
+    setTemAlertas('all');
+    setRevisado('all');
+    setSelectedAlerts([]);
+    setSelectedSchools([]);
+    setArea('all');
+    setTemInconsistencia('all');
+  };
   
   // Opções de alertas para multi-select
   const alertOptions = [
@@ -60,6 +85,9 @@ export default function ChildrenList() {
       if (temAlertas !== 'all') params.append('temAlertas', temAlertas);
       if (revisado !== 'all') params.append('revisado', revisado);
       if (selectedAlerts.length > 0) params.append('alertas', selectedAlerts.join(','));
+      if (selectedSchools.length > 0) params.append('escolas', selectedSchools.join(','));
+      if (area !== 'all') params.append('area', area);
+      if (temInconsistencia !== 'all') params.append('temInconsistencia', temInconsistencia);
 
       const res = await api.get(`/children?${params.toString()}`);
       setData(res.data.data);
@@ -72,12 +100,24 @@ export default function ChildrenList() {
   };
 
   useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        const res = await api.get('/summary');
+        setAvailableSchools(res.data.schools || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchMeta();
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       fetchChildren(1);
     }, 300); // Debounce
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bairro, nome, temAlertas, revisado, selectedAlerts, sortBy, order]);
+  }, [bairro, nome, temAlertas, revisado, selectedAlerts, selectedSchools, sortBy, order, area, temInconsistencia]);
 
   const toggleSort = (field: string) => {
     if (sortBy === field) {
@@ -91,6 +131,12 @@ export default function ChildrenList() {
   const toggleAlert = (id: string) => {
     setSelectedAlerts(prev => 
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSchool = (name: string) => {
+    setSelectedSchools(prev => 
+      prev.includes(name) ? prev.filter(s => s !== name) : [...prev, name]
     );
   };
 
@@ -110,8 +156,8 @@ export default function ChildrenList() {
           </div>
         </header>
 
-        <section aria-label="Filtros de pesquisa" className="bg-white dark:bg-gray-950 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          <div className="flex flex-col gap-1.5 lg:col-span-1">
+        <section aria-label="Filtros de pesquisa" className="bg-white dark:bg-gray-950 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          <div className="flex flex-col gap-1.5">
             <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Nome da Criança</span>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -124,7 +170,7 @@ export default function ChildrenList() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 lg:col-span-1">
+          <div className="flex flex-col gap-1.5">
             <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Bairro</span>
             <Input 
               placeholder="Filtrar por bairro..." 
@@ -133,33 +179,63 @@ export default function ChildrenList() {
               className="dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 !h-10"
             />
           </div>
-          
+
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Escola</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="justify-between !h-10 dark:bg-gray-900 dark:border-gray-800 font-normal w-full overflow-hidden">
+                  <span className="truncate">
+                    {selectedSchools.length === 0 ? "Filtrar por escola..." : `${selectedSchools.length} selecionada(s)`}
+                  </span>
+                  <Filter className="w-4 h-4 ml-2 opacity-50 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-2 max-h-80 overflow-y-auto" align="start">
+                <div className="space-y-1">
+                  {availableSchools.map((school) => (
+                    <div 
+                      key={school} 
+                      className="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-900 rounded cursor-pointer"
+                      onClick={() => toggleSchool(school)}
+                    >
+                      <Checkbox checked={selectedSchools.includes(school)} />
+                      <span className="text-xs font-medium dark:text-gray-200 truncate">{school}</span>
+                    </div>
+                  ))}
+                  {availableSchools.length === 0 && (
+                    <p className="text-[10px] text-gray-500 text-center p-2">Nenhuma escola encontrada.</p>
+                  )}
+                  {selectedSchools.length > 0 && (
+                    <Button variant="ghost" size="sm" className="w-full mt-2 text-xs h-8" onClick={() => setSelectedSchools([])}>Limpar seleção</Button>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Tipos de Alerta</span>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="justify-between !h-10 dark:bg-gray-900 dark:border-gray-800 font-normal w-full">
+                <Button variant="outline" className="justify-between !h-10 dark:bg-gray-900 dark:border-gray-800 font-normal w-full overflow-hidden">
                   <span className="truncate">
                     {selectedAlerts.length === 0 ? "Filtrar por tipo..." : `${selectedAlerts.length} selecionado(s)`}
                   </span>
                   <Filter className="w-4 h-4 ml-2 opacity-50 shrink-0" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-64 p-2">
+              <PopoverContent className="w-64 p-2 max-h-80 overflow-y-auto" align="start">
                 <div className="space-y-1">
                   {alertOptions.map((alert) => (
-                    <label 
+                    <div 
                       key={alert.id} 
-                      className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md cursor-pointer w-full"
+                      className="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-900 rounded cursor-pointer"
+                      onClick={() => toggleAlert(alert.id)}
                     >
-                      <Checkbox 
-                        checked={selectedAlerts.includes(alert.id)} 
-                        onCheckedChange={() => toggleAlert(alert.id)}
-                      />
-                      <span className="text-sm font-medium leading-none cursor-pointer select-none">
-                        {alert.label}
-                      </span>
-                    </label>
+                      <Checkbox checked={selectedAlerts.includes(alert.id)} />
+                      <span className="text-xs font-medium dark:text-gray-200 truncate">{alert.label}</span>
+                    </div>
                   ))}
                   {selectedAlerts.length > 0 && (
                     <Button variant="ghost" size="sm" className="w-full mt-2 text-xs h-8" onClick={() => setSelectedAlerts([])}>Limpar seleção</Button>
@@ -200,6 +276,18 @@ export default function ChildrenList() {
               </SelectContent>
             </Select>
           </div>
+
+          {hasActiveFilters && (
+            <div className="flex flex-col justify-end">
+              <Button 
+                variant="ghost" 
+                onClick={clearFilters}
+                className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 !h-10 font-bold"
+              >
+                Limpar Filtros
+              </Button>
+            </div>
+          )}
         </section>
 
         <section aria-label="Resultados" className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
@@ -273,7 +361,8 @@ export default function ChildrenList() {
                             <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                               {child.nome}
                             </span>
-                            <span className="text-[10px] text-gray-500 font-medium">Resp: {child.responsavel}</span>
+                            <span className="text-[10px] text-gray-500 font-medium leading-tight">Resp: {child.responsavel}</span>
+                            <span className="text-[10px] text-gray-400 font-medium italic leading-tight">Escola: {child.educacao?.escola || 'Não informado'}</span>
                           </div>
                         </TableCell>
                         <TableCell className="dark:text-gray-300 py-4 font-medium">{child.bairro}</TableCell>
@@ -357,7 +446,8 @@ export default function ChildrenList() {
                         <p className="text-lg font-black text-gray-900 dark:text-gray-100 leading-tight">
                           {child.nome}
                         </p>
-                        <p className="text-[10px] text-gray-500 font-bold -mt-1 mb-1">Responsável: {child.responsavel}</p>
+                        <p className="text-[10px] text-gray-500 font-bold -mt-1">Responsável: {child.responsavel}</p>
+                        <p className="text-[10px] text-gray-400 font-medium mb-1 italic leading-tight">Escola: {child.educacao?.escola || 'Não informado'}</p>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500 uppercase font-bold tracking-wider">
                           <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">{child.bairro}</span>
                           <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">{age} anos</span>
@@ -445,5 +535,13 @@ export default function ChildrenList() {
         </nav>
       </main>
     </div>
+  );
+}
+
+export default function ChildrenList() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-800 dark:text-gray-200">Carregando...</div>}>
+      <ChildrenListContent />
+    </Suspense>
   );
 }

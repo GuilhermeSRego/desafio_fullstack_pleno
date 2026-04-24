@@ -20,7 +20,12 @@ import {
   Cell,
   Legend,
   LabelList,
-  Label
+  Label,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
 } from 'recharts';
 import InteractiveMap from '@/components/InteractiveMap';
 
@@ -36,6 +41,7 @@ interface SummaryData {
   reviewed: number;
   criticalCases: any[];
   inconsistencyCount: number;
+  neighborhoodStats: any[];
 }
 
 export default function Dashboard() {
@@ -97,65 +103,77 @@ export default function Dashboard() {
         </header>
 
         <section aria-label="Métricas principais" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-          <Card className="bg-white dark:bg-gray-950">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Crianças</CardTitle>
-              <Users className="h-4 w-4 text-gray-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data?.total || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/children" className="block transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Card className="bg-white dark:bg-gray-950 h-full cursor-pointer hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Crianças</CardTitle>
+                <Users className="h-4 w-4 text-gray-400" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{data?.total || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-green-500">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Revisados</CardTitle>
-              <Activity className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{data?.reviewed || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/children?revisado=true" className="block transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-green-500 h-full cursor-pointer hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Revisados</CardTitle>
+                <Activity className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">{data?.reviewed || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-red-500">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Saúde</CardTitle>
-              <HeartPulse className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{data?.healthAlerts || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/children?area=saude" className="block transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-red-500 h-full cursor-pointer hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Saúde</CardTitle>
+                <HeartPulse className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{data?.healthAlerts || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-orange-500">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Educação</CardTitle>
-              <BookOpen className="h-4 w-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{data?.educationAlerts || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/children?area=educacao" className="block transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-orange-500 h-full cursor-pointer hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Educação</CardTitle>
+                <BookOpen className="h-4 w-4 text-orange-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-orange-600">{data?.educationAlerts || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-purple-500">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Social</CardTitle>
-              <ShieldAlert className="h-4 w-4 text-purple-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">{data?.socialAlerts || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/children?area=social" className="block transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-purple-500 h-full cursor-pointer hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Social</CardTitle>
+                <ShieldAlert className="h-4 w-4 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600">{data?.socialAlerts || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
 
-          <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-pink-500 shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Inconsistências</CardTitle>
-              <ShieldAlert className="h-4 w-4 text-pink-500 animate-pulse" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-pink-600">{data?.inconsistencyCount || 0}</div>
-            </CardContent>
-          </Card>
+          <Link href="/children?temInconsistencia=true" className="block transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Card className="bg-white dark:bg-gray-950 border-l-4 border-l-pink-500 shadow-md h-full cursor-pointer hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-[10px] font-bold text-gray-400 uppercase">Inconsistências</CardTitle>
+                <ShieldAlert className="h-4 w-4 text-pink-500 animate-pulse" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-pink-600">{data?.inconsistencyCount || 0}</div>
+              </CardContent>
+            </Card>
+          </Link>
         </section>
 
         <Tabs defaultValue="priority" className="w-full">
@@ -362,23 +380,61 @@ export default function Dashboard() {
 
               <Card className="flex flex-col shadow-sm">
                 <CardHeader>
-                  <CardTitle>Concentração de Alertas</CardTitle>
-                  <CardDescription>Distribuição por área de atuação</CardDescription>
+                  <CardTitle>Concentração de Alertas por Bairro</CardTitle>
+                  <CardDescription>Distribuição setorial empilhada</CardDescription>
                 </CardHeader>
                 <CardContent className="h-[350px] pt-8">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={alertsData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                    <BarChart data={data?.neighborhoodStats || []} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" opacity={0.3} />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6b7280' }} />
+                      <XAxis dataKey="neighborhood" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 10 }} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b7280' }} />
                       <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
-                      <Bar dataKey="alertas" radius={[6, 6, 0, 0]} maxBarSize={80}>
-                        {alertsData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                        <LabelList dataKey="alertas" position="top" style={{ fill: '#6b7280', fontSize: '14px', fontWeight: 'bold' }} />
-                      </Bar>
+                      <Legend />
+                      <Bar dataKey="health" name="Saúde" stackId="a" fill="#ef4444" />
+                      <Bar dataKey="education" name="Educação" stackId="a" fill="#f97316" />
+                      <Bar dataKey="social" name="Social" stackId="a" fill="#a855f7" radius={[4, 4, 0, 0]} />
                     </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="flex flex-col shadow-sm lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Análise Regional de Alertas e Inconsistências</CardTitle>
+                  <CardDescription>Comparativo por bairro (Radar)</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[450px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data?.neighborhoodStats || []}>
+                      <PolarGrid stroke="#e5e7eb" />
+                      <PolarAngleAxis dataKey="neighborhood" tick={{ fill: '#6b7280', fontSize: 12 }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 6]} hide />
+                      <Radar
+                        name="Total de Crianças"
+                        dataKey="totalChildren"
+                        stroke="#94a3b8"
+                        fill="#f1f5f9"
+                        fillOpacity={0.1}
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                      />
+                      <Radar
+                        name="Crianças com Alertas"
+                        dataKey="alerts"
+                        stroke="#ef4444"
+                        fill="#ef4444"
+                        fillOpacity={0.4}
+                      />
+                      <Radar
+                        name="Crianças com Inconsistências"
+                        dataKey="inconsistencies"
+                        stroke="#ec4899"
+                        fill="#ec4899"
+                        fillOpacity={0.4}
+                      />
+                      <Tooltip />
+                      <Legend />
+                    </RadarChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>

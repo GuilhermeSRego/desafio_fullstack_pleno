@@ -8,7 +8,7 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CheckCircle, AlertTriangle, Calendar, MapPin, User, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertTriangle, Calendar, MapPin, User, ShieldAlert, HeartPulse, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { 
@@ -122,6 +122,10 @@ export default function ChildDetails() {
       social: child.assistencia_social?.alertas?.length || 0
     });
   }
+
+  const numAlertas = (child.saude?.alertas?.length || 0) + 
+                     (child.educacao?.alertas?.length || 0) + 
+                     (child.assistencia_social?.alertas?.length || 0);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12 transition-colors">
@@ -271,41 +275,68 @@ export default function ChildDetails() {
               </CardContent>
             </Card>
 
-            <section aria-label="Progresso Longitudinal">
-              <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-lg">Evolução de Alertas</CardTitle>
-                </CardHeader>
-                <CardContent className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={evolutionData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                      <XAxis dataKey="data" axisLine={false} tickLine={false} />
-                      <YAxis axisLine={false} tickLine={false} />
-                      <ReTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                      <Legend iconType="circle" />
-                      <Line type="monotone" dataKey="saude" name="Saúde" stroke="#ef4444" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                      <Line type="monotone" dataKey="educacao" name="Educação" stroke="#f97316" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                      <Line type="monotone" dataKey="social" name="Social" stroke="#a855f7" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </section>
+            {/* HP Bar - Vida da Criança */}
+            <Card className="p-6 bg-white dark:bg-gray-950 border-gray-100 dark:border-gray-800 shadow-sm">
+              <div className="space-y-4">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Status de Acompanhamento</h3>
+                    <p className="text-2xl font-black text-gray-900 dark:text-gray-100">
+                      {numAlertas === 0 ? 'Excelente' : numAlertas <= 2 ? 'Atenção' : 'Crítico'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-gray-400 uppercase">Vitalidade Social</span>
+                    <p className="text-xl font-black tabular-nums">{Math.max(0, 100 - (numAlertas * 20))}%</p>
+                  </div>
+                </div>
 
-            <section aria-label="Situação por Área" className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* SAÚDE */}
-              <Card className={child.saude?.alertas?.length ? 'border-red-200 bg-red-50/30 dark:bg-red-950/20' : 'dark:bg-gray-950 shadow-sm'}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold flex items-center justify-between opacity-70">
-                    SAÚDE
-                    {child.saude?.alertas?.length > 0 && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                <div className="relative h-6 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden border-2 border-white dark:border-gray-900 shadow-inner">
+                  {/* Background Bar (Dynamic Color) */}
+                  <div 
+                    className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out flex ${
+                      numAlertas === 0 ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' :
+                      numAlertas <= 2 ? 'bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)]' :
+                      'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]'
+                    }`}
+                    style={{ width: `${Math.max(5, 100 - (numAlertas * 20))}%` }}
+                  >
+                    {/* Inconsistency Segment (Pink) */}
+                    {child.inconsistencies && (
+                      <div 
+                        className="h-full bg-pink-500 animate-pulse" 
+                        style={{ width: '30%' }} 
+                        title="Inconsistência de dados detectada"
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Glossy Overlay */}
+                  <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10" />
+                </div>
+                
+                <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+                  <span>Vulnerabilidade</span>
+                  <div className="flex gap-4">
+                    {child.inconsistencies && <span className="text-pink-500 flex items-center gap-1"><div className="w-1.5 h-1.5 bg-pink-500 rounded-full" /> Inconsistência</span>}
+                    <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 bg-gray-300 rounded-full" /> Total</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Saúde */}
+              <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-red-500 overflow-hidden">
+                <CardHeader className="bg-red-50/30 dark:bg-red-950/10 py-3">
+                  <CardTitle className="text-xs font-bold uppercase tracking-widest text-red-600 dark:text-red-400 flex items-center gap-2">
+                    <HeartPulse size={14} /> Saúde
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm space-y-3">
+                <CardContent className="p-4 space-y-4">
                   <div>
                     <span className="text-[10px] text-gray-500 block">Última Consulta</span>
-                    <span className="font-bold">{child.saude?.ultima_consulta ? format(new Date(child.saude.ultima_consulta), "dd/MM/yy") : "Não informado"}</span>
+                    <span className="font-bold">{child.saude?.ultima_consulta ? format(new Date(child.saude.ultima_consulta), "dd/MM/yyyy") : 'Não informado'}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] text-gray-500 block">Vacinas</span>
@@ -316,37 +347,37 @@ export default function ChildDetails() {
                 </CardContent>
               </Card>
 
-              {/* EDUCAÇÃO */}
-              <Card className={child.educacao?.alertas?.length ? 'border-orange-200 bg-orange-50/30 dark:bg-orange-950/20' : 'dark:bg-gray-950 shadow-sm'}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold flex items-center justify-between opacity-70">
-                    EDUCAÇÃO
-                    {child.educacao?.alertas?.length > 0 && <AlertTriangle className="w-4 h-4 text-orange-500" />}
+              {/* Educação */}
+              <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-orange-500 overflow-hidden">
+                <CardHeader className="bg-orange-50/30 dark:bg-orange-950/10 py-3">
+                  <CardTitle className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 flex items-center gap-2">
+                    <BookOpen size={14} /> Educação
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm space-y-3">
+                <CardContent className="p-4 space-y-4">
                   <div>
                     <span className="text-[10px] text-gray-500 block">Escola</span>
-                    <span className="font-bold leading-tight block break-words">{child.educacao?.escola || 'Não informado'}</span>
+                    <span className="font-bold truncate block">{child.educacao?.escola || 'Não informado'}</span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div>
                     <span className="text-[10px] text-gray-500 block">Frequência</span>
-                    <span className={`font-bold ${(child.educacao?.frequencia_percent !== null && child.educacao?.frequencia_percent !== undefined) ? (child.educacao.frequencia_percent < 75 ? 'text-red-500' : 'text-green-500') : 'text-gray-500'}`}>
-                      {(child.educacao?.frequencia_percent !== null && child.educacao?.frequencia_percent !== undefined) ? `${child.educacao.frequencia_percent}%` : 'Não informado'}
+                    <span className="font-bold">
+                      {typeof child.educacao?.frequencia_percent === 'number' 
+                        ? `${child.educacao.frequencia_percent}%` 
+                        : 'Não informado'}
                     </span>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* SOCIAL */}
-              <Card className={child.assistencia_social?.alertas?.length ? 'border-purple-200 bg-purple-50/30 dark:bg-purple-950/20' : 'dark:bg-gray-950 shadow-sm'}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold flex items-center justify-between opacity-70">
-                    SOCIAL
-                    {child.assistencia_social?.alertas?.length > 0 && <AlertTriangle className="w-4 h-4 text-purple-500" />}
+              {/* Social */}
+              <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-purple-500 overflow-hidden">
+                <CardHeader className="bg-purple-50/30 dark:bg-purple-950/10 py-3">
+                  <CardTitle className="text-xs font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                    <ShieldAlert size={14} /> Social
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm space-y-3">
+                <CardContent className="p-4 space-y-4">
                   <div>
                     <span className="text-[10px] text-gray-500 block">CadÚnico</span>
                     <span className="font-bold">{child.assistencia_social?.cad_unico ? 'Ativo' : 'Pendente'}</span>
@@ -412,6 +443,28 @@ export default function ChildDetails() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Inconsistências de Registro */}
+            {child.inconsistencies && (
+              <Card className="border-pink-100 dark:border-pink-900 shadow-sm overflow-hidden">
+                <CardHeader className="bg-pink-50/20 dark:bg-pink-950/10 py-3 border-b dark:border-pink-900/50">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2 text-pink-600 dark:text-pink-400 uppercase tracking-tight">
+                    <ShieldAlert size={16} />
+                    Inconsistências de Registro
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 bg-white dark:bg-gray-950">
+                  <div className="space-y-4">
+                    {child.inconsistencies.issues.map((issue: string, i: number) => (
+                      <div key={i} className="space-y-0.5">
+                        <p className="text-pink-600 dark:text-pink-400 font-semibold text-[11px] leading-tight">• {issue}</p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400 italic ml-3">Sugerido: {child.inconsistencies.suggestions[i]}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </main>
