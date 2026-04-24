@@ -292,7 +292,7 @@ export default function ChildDetails() {
                 <CardContent className="text-sm space-y-3">
                   <div>
                     <span className="text-[10px] text-gray-500 block">Última Consulta</span>
-                    <span className="font-bold">{format(new Date(child.saude?.ultima_consulta || new Date()), "dd/MM/yy")}</span>
+                    <span className="font-bold">{child.saude?.ultima_consulta ? format(new Date(child.saude.ultima_consulta), "dd/MM/yy") : "Não informado"}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] text-gray-500 block">Vacinas</span>
@@ -318,8 +318,8 @@ export default function ChildDetails() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] text-gray-500 block">Frequência</span>
-                    <span className={`font-bold ${child.educacao?.frequencia_percent < 75 ? 'text-red-500' : 'text-green-500'}`}>
-                      {child.educacao?.frequencia_percent || 0}%
+                    <span className={`font-bold ${(child.educacao?.frequencia_percent !== null && child.educacao?.frequencia_percent !== undefined) ? (child.educacao.frequencia_percent < 75 ? 'text-red-500' : 'text-green-500') : 'text-gray-500'}`}>
+                      {(child.educacao?.frequencia_percent !== null && child.educacao?.frequencia_percent !== undefined) ? `${child.educacao.frequencia_percent}%` : 'Não informado'}
                     </span>
                   </div>
                 </CardContent>

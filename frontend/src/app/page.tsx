@@ -84,8 +84,15 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Painel de Monitoramento</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">Dados consolidados e gestão de casos prioritários</p>
           </div>
-          <Link href="/children" passHref>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white" aria-label="Navegar para a lista completa de crianças">Ver Lista Completa</Button>
+          <Link href="/children" passHref className="w-full sm:w-auto">
+            <Button 
+              variant="outline"
+              className="w-full sm:w-auto bg-white dark:bg-gray-950 border-2 border-blue-100 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-white font-medium h-12 px-6 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-blue-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2" 
+              aria-label="Navegar para a base de alunos"
+            >
+              <Users size={20} />
+              Base de Alunos
+            </Button>
           </Link>
         </header>
 
@@ -166,15 +173,15 @@ export default function Dashboard() {
 
           <TabsContent value="priority" className="space-y-6 outline-none">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="flex flex-col shadow-sm border-gray-200 dark:border-gray-800">
-                <CardHeader className="bg-gray-50/50 dark:bg-gray-900/20 rounded-t-lg">
+              <Card className="flex flex-col shadow-sm border-gray-200 dark:border-gray-800 h-[500px]">
+                <CardHeader className="bg-gray-50/50 dark:bg-gray-900/20 rounded-t-lg shrink-0">
                   <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400 text-lg">
                     <TrendingUp className="w-5 h-5" />
                     Quadro de Prioridades (Críticos)
                   </CardTitle>
                   <CardDescription>Crianças com maior acúmulo de alertas</CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 p-0 overflow-hidden">
+                <CardContent className="flex-1 p-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800">
                   {/* Desktop Table View */}
                   <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-sm text-left border-collapse">
@@ -197,7 +204,13 @@ export default function Dashboard() {
                             </td>
                             <td className="p-4 text-right">
                               <Link href={`/children/${child.originalId}`} passHref>
-                                <Button variant="ghost" size="sm" className="h-8 hover:bg-gray-200 dark:hover:bg-gray-700">Ver Caso</Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="h-9 rounded-full border-blue-100 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-white font-medium px-4 transition-all"
+                                >
+                                  Ver Caso
+                                </Button>
                               </Link>
                             </td>
                           </tr>
@@ -218,7 +231,13 @@ export default function Dashboard() {
                           <Badge variant="destructive" className="rounded-full w-8 h-8 p-0 flex items-center justify-center font-bold">{child.totalAlertas}</Badge>
                         </div>
                         <Link href={`/children/${child.originalId}`} passHref className="block">
-                          <Button variant="outline" size="sm" className="w-full h-10 border-red-100 text-red-600 dark:border-red-900">Visualizar Detalhes</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full h-11 rounded-xl border-blue-100 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-white font-medium transition-all shadow-sm"
+                          >
+                            Visualizar Detalhes
+                          </Button>
                         </Link>
                       </div>
                     ))}
@@ -229,15 +248,15 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="flex flex-col shadow-sm border-pink-100 dark:border-pink-950">
-                <CardHeader className="bg-pink-50/30 dark:bg-pink-950/10 rounded-t-lg">
+              <Card className="flex flex-col shadow-sm border-pink-100 dark:border-pink-950 h-[500px]">
+                <CardHeader className="bg-pink-50/30 dark:bg-pink-950/10 rounded-t-lg shrink-0">
                   <CardTitle className="flex items-center gap-2 text-pink-600 dark:text-pink-400 text-lg">
                     <ShieldAlert className="w-5 h-5" />
                     Inconsistências de Registro
                   </CardTitle>
                   <CardDescription>Dados faltantes que necessitam de atenção técnica</CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 p-0 overflow-hidden">
+                <CardContent className="flex-1 p-0 overflow-y-auto scrollbar-thin scrollbar-thumb-pink-100 dark:scrollbar-thumb-pink-900">
                   {/* Desktop Table View */}
                   <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-sm text-left border-collapse">

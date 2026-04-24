@@ -57,7 +57,7 @@ model HealthData {
   id              String   @id @default(uuid())
   childId         String   @unique
   child           Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
-  ultima_consulta DateTime
+  ultima_consulta DateTime?
   vacinas_em_dia  Boolean
   alertas         String[]
 }

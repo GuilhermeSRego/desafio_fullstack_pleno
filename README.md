@@ -16,7 +16,7 @@ Este projeto é um sistema full-stack desenvolvido para apoiar técnicos de camp
 
 ### Visualização e Mapas
 - **Leaflet**: Biblioteca leve e extensiva para visualização geoespacial. Essencial para o requisito de Mapa de Calor sem sobrecarregar o navegador do técnico.
-- **Recharts**: Selecionada pela integração nativa com React e pela excelente responsividade dos gráficos, facilitando a visualização de dados complexos em telas pequenas.
+- **Recharts**: Selecionada pela integração com o ecossistema do Next.js e pela excelente responsividade dos gráficos, facilitando a visualização de dados complexos em telas pequenas.
 
 ---
 

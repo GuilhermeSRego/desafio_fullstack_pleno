@@ -119,7 +119,7 @@ export default function ChildrenList() {
                 placeholder="Buscar por nome..." 
                 value={nome} 
                 onChange={(e) => setNome(e.target.value)} 
-                className="pl-9 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 h-10"
+                className="pl-9 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 !h-10"
               />
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function ChildrenList() {
               placeholder="Filtrar por bairro..." 
               value={bairro} 
               onChange={(e) => setBairro(e.target.value)} 
-              className="dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 h-10"
+              className="dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 !h-10"
             />
           </div>
           
@@ -138,7 +138,7 @@ export default function ChildrenList() {
             <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Tipos de Alerta</span>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="justify-between h-10 dark:bg-gray-900 dark:border-gray-800 font-normal">
+                <Button variant="outline" className="justify-between !h-10 dark:bg-gray-900 dark:border-gray-800 font-normal w-full">
                   <span className="truncate">
                     {selectedAlerts.length === 0 ? "Filtrar por tipo..." : `${selectedAlerts.length} selecionado(s)`}
                   </span>
@@ -148,16 +148,18 @@ export default function ChildrenList() {
               <PopoverContent className="w-64 p-2">
                 <div className="space-y-1">
                   {alertOptions.map((alert) => (
-                    <div 
+                    <label 
                       key={alert.id} 
-                      className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md cursor-pointer"
-                      onClick={() => toggleAlert(alert.id)}
+                      className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md cursor-pointer w-full"
                     >
-                      <Checkbox checked={selectedAlerts.includes(alert.id)} id={alert.id} />
-                      <label htmlFor={alert.id} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                      <Checkbox 
+                        checked={selectedAlerts.includes(alert.id)} 
+                        onCheckedChange={() => toggleAlert(alert.id)}
+                      />
+                      <span className="text-sm font-medium leading-none cursor-pointer select-none">
                         {alert.label}
-                      </label>
-                    </div>
+                      </span>
+                    </label>
                   ))}
                   {selectedAlerts.length > 0 && (
                     <Button variant="ghost" size="sm" className="w-full mt-2 text-xs h-8" onClick={() => setSelectedAlerts([])}>Limpar seleção</Button>
@@ -170,7 +172,7 @@ export default function ChildrenList() {
           <div className="flex flex-col gap-1.5">
             <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Presença de Alerta</span>
             <Select value={temAlertas} onValueChange={(val) => setTemAlertas(val || 'all')}>
-              <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 h-10">
+              <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 !h-10 w-full">
                 <SelectValue>
                   {temAlertas === 'all' ? 'Ver Todas' : temAlertas === 'true' ? 'Apenas com Alertas' : 'Sem Alertas Ativos'}
                 </SelectValue>
@@ -186,7 +188,7 @@ export default function ChildrenList() {
           <div className="flex flex-col gap-1.5">
             <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Revisão</span>
             <Select value={revisado} onValueChange={(val) => setRevisado(val || 'all')}>
-              <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 h-10">
+              <SelectTrigger className="dark:bg-gray-900 dark:border-gray-800 dark:text-gray-100 !h-10 w-full">
                 <SelectValue>
                   {revisado === 'all' ? 'Todos os Status' : revisado === 'true' ? 'Já Revisados' : 'Não Revisados'}
                 </SelectValue>
@@ -204,34 +206,42 @@ export default function ChildrenList() {
           {/* Desktop Table View */}
           <div className="hidden md:block overflow-x-auto">
             <Table>
-              <TableHeader className="bg-gray-50/50 dark:bg-gray-900/50">
-                <TableRow className="dark:border-gray-800">
+              <TableHeader className="bg-gray-100/50 dark:bg-gray-900/80 border-b-2 border-gray-200 dark:border-gray-800">
+                <TableRow className="hover:bg-transparent border-none">
                   <TableHead 
-                    className="dark:text-gray-400 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-900/80 transition-colors"
+                    className="font-bold text-gray-900 dark:text-gray-100 cursor-pointer h-12"
                     onClick={() => toggleSort('nome')}
                   >
-                    Nome <SortIcon field="nome" />
+                    <div className="flex items-center">
+                      Nome <SortIcon field="nome" />
+                    </div>
                   </TableHead>
                   <TableHead 
-                    className="dark:text-gray-400 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-900/80 transition-colors"
+                    className="font-bold text-gray-900 dark:text-gray-100 cursor-pointer h-12"
                     onClick={() => toggleSort('bairro')}
                   >
-                    Bairro <SortIcon field="bairro" />
+                    <div className="flex items-center">
+                      Bairro <SortIcon field="bairro" />
+                    </div>
                   </TableHead>
                   <TableHead 
-                    className="dark:text-gray-400 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-900/80 transition-colors"
+                    className="font-bold text-gray-900 dark:text-gray-100 cursor-pointer h-12 text-center"
                     onClick={() => toggleSort('idade')}
                   >
-                    Idade <SortIcon field="idade" />
+                    <div className="flex items-center justify-center">
+                      Idade <SortIcon field="idade" />
+                    </div>
                   </TableHead>
                   <TableHead 
-                    className="dark:text-gray-400 cursor-pointer hover:bg-gray-100/50 dark:hover:bg-gray-900/80 transition-colors"
+                    className="font-bold text-gray-900 dark:text-gray-100 cursor-pointer h-12 text-center"
                     onClick={() => toggleSort('alertas')}
                   >
-                    Alertas <SortIcon field="alertas" />
+                    <div className="flex items-center justify-center">
+                      Alertas <SortIcon field="alertas" />
+                    </div>
                   </TableHead>
-                  <TableHead className="dark:text-gray-400">Revisado</TableHead>
-                  <TableHead className="text-right dark:text-gray-400">Ação</TableHead>
+                  <TableHead className="font-bold text-gray-900 dark:text-gray-100 h-12 text-center">Revisado</TableHead>
+                  <TableHead className="font-bold text-gray-900 dark:text-gray-100 h-12 text-right pr-6">Ação</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -257,28 +267,40 @@ export default function ChildrenList() {
                     const age = new Date().getFullYear() - new Date(child.data_nascimento).getFullYear();
 
                     return (
-                      <TableRow key={child.id} className="dark:border-gray-800">
-                        <TableCell className="font-medium dark:text-gray-200">{child.nome}</TableCell>
-                        <TableCell className="dark:text-gray-300">{child.bairro}</TableCell>
-                        <TableCell className="dark:text-gray-300">{age} anos</TableCell>
-                        <TableCell>
+                      <TableRow key={child.id} className="dark:border-gray-800 hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-all duration-200 group">
+                        <TableCell className="py-4">
+                          <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+                            {child.nome}
+                          </span>
+                        </TableCell>
+                        <TableCell className="dark:text-gray-300 py-4 font-medium">{child.bairro}</TableCell>
+                        <TableCell className="dark:text-gray-300 py-4 text-center font-medium">{age} anos</TableCell>
+                        <TableCell className="py-4 text-center">
                           {numAlertas > 0 ? (
-                            <Badge variant="destructive">{numAlertas} alerta(s)</Badge>
+                            <Badge variant="destructive" className="font-bold px-3 py-1 shadow-sm shadow-red-500/10">
+                              {numAlertas} {numAlertas === 1 ? 'alerta' : 'alertas'}
+                            </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900 dark:text-green-400">Tudo OK</Badge>
+                            <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900/50 dark:text-green-400 font-bold px-3 py-1">
+                              Tudo OK
+                            </Badge>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="py-4 text-center">
                           {child.revisado ? (
-                            <Badge variant="default" className="bg-blue-600 dark:bg-blue-700">Sim</Badge>
+                            <Badge variant="default" className="bg-blue-600 dark:bg-blue-700 font-bold px-3 py-1">Sim</Badge>
                           ) : (
-                            <Badge variant="secondary" className="dark:bg-gray-800 dark:text-gray-300">Não</Badge>
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 font-bold px-3 py-1">Não</Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right py-4 pr-6">
                           <Link href={`/children/${child.originalId}`} passHref>
-                            <Button variant="ghost" size="sm" className="dark:text-gray-300 dark:hover:text-white">
-                              <Eye className="w-4 h-4 mr-2" /> Ver
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="bg-white dark:bg-gray-950 border-blue-200 dark:border-blue-900 text-blue-700 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-white transition-all duration-300 shadow-sm cursor-pointer group-hover:shadow-md h-9 px-4 rounded-full font-medium"
+                            >
+                              <Eye className="w-4 h-4 mr-2" /> Ver Caso
                             </Button>
                           </Link>
                         </TableCell>
@@ -306,38 +328,51 @@ export default function ChildrenList() {
                 const age = new Date().getFullYear() - new Date(child.data_nascimento).getFullYear();
 
                 return (
-                  <div key={child.id} className="p-4 space-y-4 hover:bg-gray-50 dark:hover:bg-gray-900/40 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <p className="font-bold text-gray-900 dark:text-gray-100">{child.nome}</p>
-                        <div className="flex items-center gap-2 text-[10px] text-gray-500 uppercase font-bold tracking-wider">
-                          <span>{child.bairro}</span>
-                          <span>•</span>
-                          <span>{age} anos</span>
+                  <div key={child.id} className="p-5 space-y-5 hover:bg-gray-50 dark:hover:bg-gray-900/40 transition-all duration-300">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1.5 flex-1">
+                        <p className="text-lg font-black text-gray-900 dark:text-gray-100 leading-tight">
+                          {child.nome}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500 uppercase font-bold tracking-wider">
+                          <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">{child.bairro}</span>
+                          <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">{age} anos</span>
                         </div>
                       </div>
-                      <Link href={`/children/${child.originalId}`} passHref>
-                        <Button variant="outline" size="sm" className="h-8 rounded-full border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-400">
-                          <Eye className="w-4 h-4 mr-1.5" /> Ver Caso
+                      <Link href={`/children/${child.originalId}`} passHref className="shrink-0">
+                        <Button variant="default" size="sm" className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 active:scale-95 transition-all cursor-pointer font-medium">
+                          Ver Detalhes
                         </Button>
                       </Link>
                     </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 space-y-1">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">Alertas</p>
+  
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-1.5">
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Status Alertas</p>
                         {numAlertas > 0 ? (
-                          <Badge variant="destructive" className="w-full justify-center py-1">{numAlertas} Alerta(s) Ativo(s)</Badge>
+                          <div className="flex items-center text-red-600 dark:text-red-400 font-bold text-sm">
+                            <span className="w-2 h-2 bg-red-600 rounded-full mr-2 animate-pulse" />
+                            {numAlertas} {numAlertas === 1 ? 'Alerta' : 'Alertas'}
+                          </div>
                         ) : (
-                          <Badge variant="outline" className="w-full justify-center py-1 text-green-600 border-green-200 bg-green-50 dark:bg-green-950/30">Tudo OK</Badge>
+                          <div className="flex items-center text-green-600 dark:text-green-400 font-bold text-sm">
+                            <span className="w-2 h-2 bg-green-600 rounded-full mr-2" />
+                            Tudo em Dia
+                          </div>
                         )}
                       </div>
-                      <div className="flex-1 space-y-1">
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">Revisado</p>
+                      <div className="bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-1.5">
+                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Revisão Técnica</p>
                         {child.revisado ? (
-                          <Badge variant="default" className="w-full justify-center py-1 bg-blue-600">Sim</Badge>
+                          <div className="flex items-center text-blue-600 dark:text-blue-400 font-bold text-sm">
+                            <span className="w-2 h-2 bg-blue-600 rounded-full mr-2" />
+                            Finalizada
+                          </div>
                         ) : (
-                          <Badge variant="secondary" className="w-full justify-center py-1 dark:bg-gray-800">Não</Badge>
+                          <div className="flex items-center text-amber-600 dark:text-amber-400 font-bold text-sm">
+                            <span className="w-2 h-2 bg-amber-500 rounded-full mr-2 animate-pulse" />
+                            Pendente
+                          </div>
                         )}
                       </div>
                     </div>

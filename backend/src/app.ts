@@ -317,24 +317,28 @@ app.get('/children/:id', authenticateToken, async (req: Request, res: Response):
 // Helper to recalculate alerts
 const calculateAlerts = (childData: any) => {
   const saudeAlerts = [];
-  if (!childData.saude.vacinas_em_dia) saudeAlerts.push('vacinas_atrasadas');
+  if (childData.saude.vacinas_em_dia === false) saudeAlerts.push('vacinas_atrasadas');
   
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  if (new Date(childData.saude.ultima_consulta) < sixMonthsAgo) saudeAlerts.push('consulta_atrasada');
+  if (!childData.saude.ultima_consulta) {
+    saudeAlerts.push('cadastro_ausente');
+  } else {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    if (new Date(childData.saude.ultima_consulta) < sixMonthsAgo) saudeAlerts.push('consulta_atrasada');
+  }
 
   const educAlerts = [];
-  if (childData.educacao.frequencia_percent !== null && childData.educacao.frequencia_percent < 75) {
+  if (!childData.educacao.escola || childData.educacao.escola === "Não informado") {
+    educAlerts.push('matricula_pendente');
+  }
+  if (childData.educacao.frequencia_percent !== null && childData.educacao.frequencia_percent !== undefined && childData.educacao.frequencia_percent < 75) {
     educAlerts.push('frequencia_baixa');
   }
 
   const socialAlerts = [];
-  if (!childData.assistencia_social.beneficio_ativo) socialAlerts.push('beneficio_suspenso');
-  if (!childData.assistencia_social.cad_unico) socialAlerts.push('cad_unico_pendente');
+  if (childData.assistencia_social.beneficio_ativo === false) socialAlerts.push('beneficio_suspenso');
+  if (childData.assistencia_social.cad_unico === false) socialAlerts.push('cadastro_desatualizado');
 
-  // If the user is updating registration, we assume 'cadastro_desatualizado' is resolved
-  // In a real system, this would be based on updatedAt date or similar.
-  // We'll return these and the caller will update the DB.
   return { saudeAlerts, educAlerts, socialAlerts };
 };
 
@@ -367,11 +371,11 @@ app.patch('/children/:id/review', authenticateToken, async (req: Request, res: R
     const newData = {
       saude: {
         vacinas_em_dia: vacinas_em_dia !== undefined ? vacinas_em_dia : child.saude?.vacinas_em_dia,
-        ultima_consulta: ultima_consulta || child.saude?.ultima_consulta
+        ultima_consulta: ultima_consulta === '' ? null : (ultima_consulta || child.saude?.ultima_consulta)
       },
       educacao: {
-        frequencia_percent: frequencia_nova !== undefined ? parseFloat(frequencia_nova) : child.educacao?.frequencia_percent,
-        escola: escola || child.educacao?.escola
+        frequencia_percent: frequencia_nova === '' ? null : (frequencia_nova !== undefined ? parseFloat(frequencia_nova) : child.educacao?.frequencia_percent),
+        escola: escola === '' ? null : (escola !== undefined ? escola : child.educacao?.escola)
       },
       assistencia_social: {
         cad_unico: cad_unico !== undefined ? cad_unico : child.assistencia_social?.cad_unico,
@@ -402,24 +406,45 @@ app.patch('/children/:id/review', authenticateToken, async (req: Request, res: R
           revisado_por: username,
           revisado_em: new Date(),
           saude: {
-            update: {
-              vacinas_em_dia: newData.saude.vacinas_em_dia,
-              ultima_consulta: new Date(newData.saude.ultima_consulta),
-              alertas: saudeAlerts
+            upsert: {
+              create: {
+                vacinas_em_dia: newData.saude.vacinas_em_dia ?? false,
+                ultima_consulta: newData.saude.ultima_consulta ? new Date(newData.saude.ultima_consulta) : null,
+                alertas: saudeAlerts
+              },
+              update: {
+                vacinas_em_dia: newData.saude.vacinas_em_dia,
+                ultima_consulta: newData.saude.ultima_consulta ? new Date(newData.saude.ultima_consulta) : null,
+                alertas: saudeAlerts
+              }
             }
           },
           educacao: {
-            update: {
-              frequencia_percent: newData.educacao.frequencia_percent,
-              escola: newData.educacao.escola,
-              alertas: educAlerts
+            upsert: {
+              create: {
+                frequencia_percent: newData.educacao.frequencia_percent,
+                escola: newData.educacao.escola,
+                alertas: educAlerts
+              },
+              update: {
+                frequencia_percent: newData.educacao.frequencia_percent,
+                escola: newData.educacao.escola,
+                alertas: educAlerts
+              }
             }
           },
           assistencia_social: {
-            update: {
-              cad_unico: newData.assistencia_social.cad_unico,
-              beneficio_ativo: newData.assistencia_social.beneficio_ativo,
-              alertas: socialAlerts
+            upsert: {
+              create: {
+                cad_unico: newData.assistencia_social.cad_unico ?? false,
+                beneficio_ativo: newData.assistencia_social.beneficio_ativo ?? false,
+                alertas: socialAlerts
+              },
+              update: {
+                cad_unico: newData.assistencia_social.cad_unico,
+                beneficio_ativo: newData.assistencia_social.beneficio_ativo,
+                alertas: socialAlerts
+              }
             }
           }
         }
