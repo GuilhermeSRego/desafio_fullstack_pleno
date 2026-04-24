@@ -24,8 +24,33 @@ model Child {
   revisado_por  String?
   revisado_em   DateTime?
 
+  reviews       ReviewHistory[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ReviewHistory {
+  id           String   @id @default(uuid())
+  childId      String
+  child        Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  anotacao     String?
+  revisado_por String
+  
+  // Snapshots for evolution charts
+  frequencia_anterior Float?
+  frequencia_nova     Float?
+  
+  num_alertas_saude_anterior Int @default(0)
+  num_alertas_saude_novo     Int @default(0)
+  
+  num_alertas_educ_anterior  Int @default(0)
+  num_alertas_educ_novo      Int @default(0)
+  
+  num_alertas_social_anterior Int @default(0)
+  num_alertas_social_novo     Int @default(0)
+
+  createdAt DateTime @default(now())
 }
 
 model HealthData {
