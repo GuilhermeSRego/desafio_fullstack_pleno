@@ -29,6 +29,64 @@ const authenticateToken = (req: Request, res: Response, next: Function) => {
   });
 };
 
+// Helper to find data inconsistencies
+const getInconsistenciesForChild = (c: any) => {
+  const issues: string[] = [];
+  const suggestions: string[] = [];
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+  // Educação
+  if (!c.educacao || !c.educacao.escola || c.educacao.escola === "Não informado") {
+    if (!(c.educacao?.alertas || []).includes('matricula_pendente')) {
+      issues.push("Escola não informada e sem alerta de matrícula");
+      suggestions.push("Adicionar alerta 'matricula_pendente'");
+    }
+  }
+  if (c.educacao && c.educacao.frequencia_percent !== null && c.educacao.frequencia_percent < 75 && !c.educacao.alertas.includes('frequencia_baixa')) {
+    issues.push("Frequência abaixo de 75% sem alerta correspondente");
+    suggestions.push("Adicionar alerta 'frequencia_baixa'");
+  }
+
+  // Saúde
+  if (c.saude) {
+    if (c.saude.ultima_consulta && new Date(c.saude.ultima_consulta) < sixMonthsAgo && !c.saude.alertas.includes('consulta_atrasada')) {
+      issues.push("Consulta muito antiga (>6 meses) sem alerta");
+      suggestions.push("Adicionar alerta 'consulta_atrasada'");
+    }
+    if (c.saude.vacinas_em_dia === false && !c.saude.alertas.includes('vacinas_atrasadas')) {
+      issues.push("Vacinas em atraso sem alerta correspondente");
+      suggestions.push("Adicionar alerta 'vacinas_atrasadas'");
+    }
+  } else {
+    issues.push("Dados de saúde totalmente ausentes");
+    suggestions.push("Realizar busca ativa para dados de saúde");
+  }
+
+  // Social
+  if (c.assistencia_social) {
+    if (c.assistencia_social.beneficio_ativo === false && !c.assistencia_social.alertas.includes('beneficio_suspenso')) {
+      issues.push("Benefício suspenso sem alerta de acompanhamento");
+      suggestions.push("Adicionar alerta 'beneficio_suspenso'");
+    }
+    if (c.assistencia_social.cad_unico === false && !c.assistencia_social.alertas.includes('cadastro_desatualizado')) {
+      issues.push("CadÚnico desatualizado/ausente sem alerta");
+      suggestions.push("Adicionar alerta 'cadastro_desatualizado'");
+    }
+  } else {
+    issues.push("Dados de assistência social ausentes");
+    suggestions.push("Verificar situação no CadÚnico");
+  }
+
+  // Cadastro Básico
+  if (!c.bairro || !c.responsavel || !c.data_nascimento) {
+    issues.push("Dados cadastrais básicos incompletos");
+    suggestions.push("Atualizar ficha cadastral da criança");
+  }
+
+  return issues.length > 0 ? { issues, suggestions } : null;
+};
+
 // POST /auth/token
 app.post('/auth/token', (req: Request, res: Response): any => {
   const { email, password } = req.body;
@@ -113,65 +171,17 @@ app.get('/inconsistencies', authenticateToken, async (req: Request, res: Respons
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
     const data = allChildren.map(c => {
-      const issues: string[] = [];
-      const suggestions: string[] = [];
+      const inconsistency = getInconsistenciesForChild(c);
+      if (!inconsistency) return null;
 
-      // Educação
-      if (!c.educacao || !c.educacao.escola || c.educacao.escola === "Não informado") {
-        if (!(c.educacao?.alertas || []).includes('matricula_pendente')) {
-          issues.push("Escola não informada e sem alerta de matrícula");
-          suggestions.push("Adicionar alerta 'matricula_pendente'");
-        }
-      }
-      if (c.educacao && c.educacao.frequencia_percent !== null && c.educacao.frequencia_percent < 75 && !c.educacao.alertas.includes('frequencia_baixa')) {
-        issues.push("Frequência abaixo de 75% sem alerta correspondente");
-        suggestions.push("Adicionar alerta 'frequencia_baixa'");
-      }
-
-      // Saúde
-      if (c.saude) {
-        if (c.saude.ultima_consulta && new Date(c.saude.ultima_consulta) < sixMonthsAgo && !c.saude.alertas.includes('consulta_atrasada')) {
-          issues.push("Consulta muito antiga (>6 meses) sem alerta");
-          suggestions.push("Adicionar alerta 'consulta_atrasada'");
-        }
-        if (c.saude.vacinas_em_dia === false && !c.saude.alertas.includes('vacinas_atrasadas')) {
-          issues.push("Vacinas em atraso sem alerta correspondente");
-          suggestions.push("Adicionar alerta 'vacinas_atrasadas'");
-        }
-      } else {
-        issues.push("Dados de saúde totalmente ausentes");
-        suggestions.push("Realizar busca ativa para dados de saúde");
-      }
-
-      // Social
-      if (c.assistencia_social) {
-        if (c.assistencia_social.beneficio_ativo === false && !c.assistencia_social.alertas.includes('beneficio_suspenso')) {
-          issues.push("Benefício suspenso sem alerta de acompanhamento");
-          suggestions.push("Adicionar alerta 'beneficio_suspenso'");
-        }
-        if (c.assistencia_social.cad_unico === false && !c.assistencia_social.alertas.includes('cadastro_desatualizado')) {
-          issues.push("CadÚnico desatualizado/ausente sem alerta");
-          suggestions.push("Adicionar alerta 'cadastro_desatualizado'");
-        }
-      } else {
-        issues.push("Dados de assistência social ausentes");
-        suggestions.push("Verificar situação no CadÚnico");
-      }
-
-      // Cadastro Básico
-      if (!c.bairro || !c.responsavel || !c.data_nascimento) {
-        issues.push("Dados cadastrais básicos incompletos");
-        suggestions.push("Atualizar ficha cadastral da criança");
-      }
-
-      return issues.length > 0 ? { 
+      return { 
         id: c.id, 
         originalId: c.originalId, 
         nome: c.nome, 
         bairro: c.bairro, 
-        issues, 
-        suggestions 
-      } : null;
+        issues: inconsistency.issues, 
+        suggestions: inconsistency.suggestions 
+      };
     }).filter(Boolean);
 
     res.json(data);
@@ -277,7 +287,10 @@ app.get('/children', authenticateToken, async (req: Request, res: Response) => {
     }
 
     res.json({
-      data,
+      data: data.map(c => ({
+        ...c,
+        inconsistencies: getInconsistenciesForChild(c)
+      })),
       meta: {
         total,
         page: pageNumber,
@@ -307,7 +320,10 @@ app.get('/children/:id', authenticateToken, async (req: Request, res: Response):
     });
 
     if (!child) return res.status(404).json({ error: 'Child not found' });
-    res.json(child);
+    res.json({
+      ...child,
+      inconsistencies: getInconsistenciesForChild(child)
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -471,7 +487,10 @@ app.patch('/children/:id/review', authenticateToken, async (req: Request, res: R
       include: { saude: true, educacao: true, assistencia_social: true, reviews: { orderBy: { createdAt: 'desc' } } }
     });
 
-    res.json(updatedChild);
+    res.json({
+      ...updatedChild,
+      inconsistencies: getInconsistenciesForChild(updatedChild)
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

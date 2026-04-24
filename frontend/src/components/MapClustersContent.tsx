@@ -17,7 +17,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, MapPin } from "lucide-react";
+import { Eye, MapPin, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
 const BairrosCoords: Record<string, [number, number]> = {
@@ -128,6 +128,7 @@ export default function MapClustersContent() {
       try {
         const res = await api.get('/children?limit=1000');
         const data = res.data.data;
+        // Fetch inconsistency info (backend already includes it in /children)
         setChildren(data);
 
         // Prepara pontos de calor
@@ -138,9 +139,9 @@ export default function MapClustersContent() {
             (child.educacao?.alertas?.length || 0) + 
             (child.assistencia_social?.alertas?.length || 0);
 
-          if (numAlertas > 0 && BairrosCoords[child.bairro]) {
+          if ((numAlertas > 0 || child.inconsistencies) && BairrosCoords[child.bairro]) {
             const [lat, lng] = BairrosCoords[child.bairro];
-            hPoints.push([lat, lng, numAlertas * 0.4]);
+            hPoints.push([lat, lng, (numAlertas || 1) * 0.4]);
           }
         });
         setHeatPoints(hPoints);
@@ -183,58 +184,125 @@ export default function MapClustersContent() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto p-6 pt-2">
-            <div className="rounded-md border dark:border-gray-800 overflow-hidden">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
-                    <TableRow className="dark:border-gray-800">
-                      <TableHead className="dark:text-gray-400 min-w-[150px]">Nome</TableHead>
-                      <TableHead className="dark:text-gray-400 hidden md:table-cell">Bairro</TableHead>
-                      <TableHead className="dark:text-gray-400 text-center">Alertas</TableHead>
-                      <TableHead className="text-right dark:text-gray-400">Ação</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedChildren.map((child) => {
-                      const numAlertas = 
-                        (child.saude?.alertas?.length || 0) + 
-                        (child.educacao?.alertas?.length || 0) + 
-                        (child.assistencia_social?.alertas?.length || 0);
-                      
-                      return (
-                        <TableRow key={child.id} className="dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
-                          <TableCell className="font-medium dark:text-gray-200 py-4">
-                            {child.nome}
-                            <div className="md:hidden text-xs text-gray-500 mt-1">{child.bairro}</div>
-                          </TableCell>
-                          <TableCell className="dark:text-gray-300 hidden md:table-cell">{child.bairro}</TableCell>
-                          <TableCell className="text-center">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pt-2">
+            {/* Desktop View */}
+            <div className="hidden md:block rounded-md border dark:border-gray-800 overflow-hidden">
+              <Table>
+                <TableHeader className="bg-gray-50 dark:bg-gray-900/50">
+                  <TableRow className="dark:border-gray-800">
+                    <TableHead className="dark:text-gray-400">Nome</TableHead>
+                    <TableHead className="dark:text-gray-400">Bairro</TableHead>
+                    <TableHead className="dark:text-gray-400 text-center">Alertas</TableHead>
+                    <TableHead className="text-right dark:text-gray-400">Ação</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedChildren.map((child) => {
+                    const numAlertas = 
+                      (child.saude?.alertas?.length || 0) + 
+                      (child.educacao?.alertas?.length || 0) + 
+                      (child.assistencia_social?.alertas?.length || 0);
+                    
+                    return (
+                      <TableRow key={child.id} className="dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-900/30">
+                        <TableCell className="py-4">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-gray-800 dark:text-gray-100">{child.nome}</span>
+                            <span className="text-[10px] text-gray-500 font-medium">Resp: {child.responsavel}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="dark:text-gray-300">{child.bairro}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            {child.inconsistencies && (
+                              <span 
+                                title={`Inconsistência Identificada:\n${child.inconsistencies.issues.map((iss: string, idx: number) => `• ${iss}\n  Sugestão: ${child.inconsistencies.suggestions[idx]}`).join('\n')}`}
+                                className="flex items-center"
+                              >
+                                <ShieldAlert size={16} className="text-pink-500 cursor-help" />
+                              </span>
+                            )}
                             {numAlertas > 0 ? (
-                              <Badge variant="destructive" className="font-bold">
+                              <Badge variant="destructive" className="font-bold px-3 py-1">
                                 {numAlertas} {numAlertas === 1 ? 'alerta' : 'alertas'}
                               </Badge>
+                            ) : child.inconsistencies ? (
+                              <Badge variant="outline" className="text-pink-700 border-pink-200 bg-pink-50 dark:bg-pink-950/30 dark:border-pink-900/50 dark:text-pink-400 font-bold px-3 py-1">
+                                Inconsistência
+                              </Badge>
                             ) : (
-                              <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900 dark:text-green-400">
+                              <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900/50 dark:text-green-400 font-bold px-3 py-1">
                                 Tudo OK
                               </Badge>
                             )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Link href={`/children/${child.originalId}`} passHref>
-                              <Button variant="outline" size="sm" className="h-8 dark:border-gray-800 dark:hover:bg-gray-800">
-                                <Eye className="w-3.5 h-3.5 mr-1.5" /> 
-                                <span className="hidden sm:inline">Ver Detalhes</span>
-                                <span className="sm:hidden">Ver</span>
-                              </Button>
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Link href={`/children/${child.originalId}`} passHref>
+                            <Button variant="outline" size="sm" className="h-8 rounded-full border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white transition-all">
+                              <Eye className="w-3.5 h-3.5 mr-1.5" /> Ver Detalhes
+                            </Button>
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4">
+              {selectedChildren.map((child) => {
+                const numAlertas = 
+                  (child.saude?.alertas?.length || 0) + 
+                  (child.educacao?.alertas?.length || 0) + 
+                  (child.assistencia_social?.alertas?.length || 0);
+                
+                return (
+                  <div key={child.id} className="p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1 flex-1">
+                        <p className="text-base font-black text-gray-900 dark:text-gray-100 leading-tight">{child.nome}</p>
+                        <p className="text-[10px] text-gray-500 font-bold">Resp: {child.responsavel}</p>
+                        <div className="inline-block bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-[10px] text-gray-600 dark:text-gray-400 uppercase font-bold mt-1">
+                          {child.bairro}
+                        </div>
+                      </div>
+                      <Link href={`/children/${child.originalId}`} passHref className="shrink-0">
+                        <Button variant="default" size="sm" className="h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 active:scale-95 transition-all cursor-pointer font-medium">
+                          Ver
+                        </Button>
+                      </Link>
+                    </div>
+
+                    <div className="flex items-center justify-between border-t dark:border-gray-800 pt-3">
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest">Status Alertas</p>
+                      {numAlertas > 0 ? (
+                        <div className="flex items-center text-red-600 dark:text-red-400 font-bold text-xs">
+                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full mr-2 animate-pulse" />
+                          {numAlertas} {numAlertas === 1 ? 'Alerta' : 'Alertas'}
+                        </div>
+                      ) : child.inconsistencies ? (
+                        <div className="flex items-center text-pink-600 dark:text-pink-400 font-bold text-xs">
+                          <span 
+                            title={`Inconsistência Identificada:\n${child.inconsistencies.issues.map((iss: string, idx: number) => `• ${iss}\n  Sugestão: ${child.inconsistencies.suggestions[idx]}`).join('\n')}`}
+                            className="flex items-center mr-2"
+                          >
+                            <ShieldAlert size={14} className="cursor-help" />
+                          </span>
+                          Inconsistência
+                        </div>
+                      ) : (
+                        <div className="flex items-center text-green-600 dark:text-green-400 font-bold text-xs">
+                          <span className="w-1.5 h-1.5 bg-green-600 rounded-full mr-2" />
+                          Tudo em Dia
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
           

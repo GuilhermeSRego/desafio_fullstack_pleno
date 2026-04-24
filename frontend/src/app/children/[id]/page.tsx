@@ -8,7 +8,7 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CheckCircle, AlertTriangle, Calendar, MapPin, User } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertTriangle, Calendar, MapPin, User, ShieldAlert } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { 
@@ -231,7 +231,20 @@ export default function ChildDetails() {
           <div className="lg:col-span-2 space-y-6">
             <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-2xl dark:text-gray-100">{child.nome}</CardTitle>
+                <CardTitle className="text-2xl dark:text-gray-100 flex items-center gap-3">
+                  {child.nome}
+                  {child.inconsistencies && (
+                    <span 
+                      title={`Inconsistência de Registro:\n${child.inconsistencies.issues.map((iss: string, idx: number) => `• ${iss}\n  Sugestão: ${child.inconsistencies.suggestions[idx]}`).join('\n')}`}
+                      className="flex items-center"
+                    >
+                      <ShieldAlert 
+                        size={24} 
+                        className="text-pink-500 cursor-help animate-pulse" 
+                      />
+                    </span>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
                 <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">

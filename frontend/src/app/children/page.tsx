@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Eye, ArrowUpDown, ArrowUp, ArrowDown, Search, Filter } from 'lucide-react';
+import { Eye, ArrowUpDown, ArrowUp, ArrowDown, Search, Filter, ShieldAlert } from 'lucide-react';
 import { 
   Popover, 
   PopoverContent, 
@@ -269,22 +269,45 @@ export default function ChildrenList() {
                     return (
                       <TableRow key={child.id} className="dark:border-gray-800 hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-all duration-200 group">
                         <TableCell className="py-4">
-                          <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
-                            {child.nome}
-                          </span>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+                              {child.nome}
+                            </span>
+                            <span className="text-[10px] text-gray-500 font-medium">Resp: {child.responsavel}</span>
+                          </div>
                         </TableCell>
                         <TableCell className="dark:text-gray-300 py-4 font-medium">{child.bairro}</TableCell>
                         <TableCell className="dark:text-gray-300 py-4 text-center font-medium">{age} anos</TableCell>
                         <TableCell className="py-4 text-center">
-                          {numAlertas > 0 ? (
-                            <Badge variant="destructive" className="font-bold px-3 py-1 shadow-sm shadow-red-500/10">
-                              {numAlertas} {numAlertas === 1 ? 'alerta' : 'alertas'}
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900/50 dark:text-green-400 font-bold px-3 py-1">
-                              Tudo OK
-                            </Badge>
-                          )}
+                          <div className="flex items-center justify-center gap-1">
+                            <div className="w-6 flex justify-center shrink-0">
+                              {child.inconsistencies && (
+                                <span 
+                                  title={`Inconsistência Identificada:\n${child.inconsistencies.issues.map((iss: string, idx: number) => `• ${iss}\n  Sugestão: ${child.inconsistencies.suggestions[idx]}`).join('\n')}`}
+                                  className="flex items-center"
+                                >
+                                  <ShieldAlert 
+                                    size={16} 
+                                    className="text-pink-500 cursor-help" 
+                                  />
+                                </span>
+                              )}
+                            </div>
+                            {numAlertas > 0 ? (
+                              <Badge variant="destructive" className="font-bold px-3 py-1 shadow-sm shadow-red-500/10 min-w-[80px] justify-center">
+                                {numAlertas} {numAlertas === 1 ? 'alerta' : 'alertas'}
+                              </Badge>
+                            ) : child.inconsistencies ? (
+                              <Badge variant="outline" className="text-pink-700 border-pink-200 bg-pink-50 dark:bg-pink-950/30 dark:border-pink-900/50 dark:text-pink-400 font-bold px-3 py-1 min-w-[80px] justify-center">
+                                Inconsistência
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900/50 dark:text-green-400 font-bold px-3 py-1 min-w-[80px] justify-center">
+                                Tudo OK
+                              </Badge>
+                            )}
+                            <div className="w-6 shrink-0" />
+                          </div>
                         </TableCell>
                         <TableCell className="py-4 text-center">
                           {child.revisado ? (
@@ -330,10 +353,11 @@ export default function ChildrenList() {
                 return (
                   <div key={child.id} className="p-5 space-y-5 hover:bg-gray-50 dark:hover:bg-gray-900/40 transition-all duration-300">
                     <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1.5 flex-1">
+                      <div className="space-y-1 flex-1">
                         <p className="text-lg font-black text-gray-900 dark:text-gray-100 leading-tight">
                           {child.nome}
                         </p>
+                        <p className="text-[10px] text-gray-500 font-bold -mt-1 mb-1">Responsável: {child.responsavel}</p>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500 uppercase font-bold tracking-wider">
                           <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">{child.bairro}</span>
                           <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400">{age} anos</span>
@@ -353,6 +377,16 @@ export default function ChildrenList() {
                           <div className="flex items-center text-red-600 dark:text-red-400 font-bold text-sm">
                             <span className="w-2 h-2 bg-red-600 rounded-full mr-2 animate-pulse" />
                             {numAlertas} {numAlertas === 1 ? 'Alerta' : 'Alertas'}
+                          </div>
+                        ) : child.inconsistencies ? (
+                          <div className="flex items-center text-pink-600 dark:text-pink-400 font-bold text-sm">
+                            <span 
+                              title={`Inconsistência Identificada:\n${child.inconsistencies.issues.map((iss: string, idx: number) => `• ${iss}\n  Sugestão: ${child.inconsistencies.suggestions[idx]}`).join('\n')}`}
+                              className="flex items-center mr-2"
+                            >
+                              <ShieldAlert size={14} className="cursor-help" />
+                            </span>
+                            Inconsistência
                           </div>
                         ) : (
                           <div className="flex items-center text-green-600 dark:text-green-400 font-bold text-sm">
