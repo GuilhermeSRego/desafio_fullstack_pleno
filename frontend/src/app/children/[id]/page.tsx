@@ -282,7 +282,9 @@ export default function ChildDetails() {
                   <div>
                     <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Status de Acompanhamento</h3>
                     <p className="text-2xl font-black text-gray-900 dark:text-gray-100">
-                      {numAlertas === 0 ? 'Excelente' : numAlertas <= 2 ? 'Atenção' : 'Crítico'}
+                      {numAlertas === 0 
+                        ? (child.inconsistencies ? 'Comprometido' : 'Excelente') 
+                        : (numAlertas <= 2 ? 'Atenção' : 'Crítico')}
                     </p>
                   </div>
                   <div className="text-right">

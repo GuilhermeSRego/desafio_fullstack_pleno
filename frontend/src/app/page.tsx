@@ -48,6 +48,9 @@ export default function Dashboard() {
   const [data, setData] = useState<SummaryData | null>(null);
   const [inconsistencies, setInconsistencies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hiddenNeighborhoods, setHiddenNeighborhoods] = useState<string[]>([]);
+  const [hiddenBarSeries, setHiddenBarSeries] = useState<string[]>([]);
+
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -75,11 +78,41 @@ export default function Dashboard() {
     { name: 'Social', alertas: data?.socialAlerts || 0, fill: '#a855f7' }, // purple-500
   ];
 
+  const radarData = [
+    { subject: 'Saúde', key: 'health' },
+    { subject: 'Educação', key: 'education' },
+    { subject: 'Social', key: 'social' },
+  ].map(item => {
+    const row: any = { subject: item.subject };
+    data?.neighborhoodStats?.forEach(stat => {
+      row[stat.neighborhood] = stat[item.key];
+    });
+    return row;
+  });
+
+  const neighborhoods = data?.neighborhoodStats?.map(s => s.neighborhood) || [];
+  const neighborhoodColors = ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#16a34a', '#ca8a04', '#0891b2'];
+
   const unreviewed = (data?.total || 0) - (data?.reviewed || 0);
   const reviewData = [
     { name: 'Revisados', value: data?.reviewed || 0, color: '#22c55e' }, // green-500
     { name: 'Pendentes', value: unreviewed > 0 ? unreviewed : 0, color: '#eab308' }, // yellow-500
   ];
+
+
+  const handleNeighborhoodLegendClick = (o: any) => {
+    const { value } = o;
+    setHiddenNeighborhoods(prev => 
+      prev.includes(value) ? prev.filter(n => n !== value) : [...prev, value]
+    );
+  };
+
+  const handleBarLegendClick = (o: any) => {
+    const { dataKey } = o;
+    setHiddenBarSeries(prev => 
+      prev.includes(dataKey) ? prev.filter(k => k !== dataKey) : [...prev, dataKey]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
@@ -380,61 +413,60 @@ export default function Dashboard() {
 
               <Card className="flex flex-col shadow-sm">
                 <CardHeader>
-                  <CardTitle>Concentração de Alertas por Bairro</CardTitle>
-                  <CardDescription>Distribuição setorial empilhada</CardDescription>
+                  <CardTitle>Distribuição de Alertas por Área</CardTitle>
+                  <CardDescription>Comparativo setorial por bairro (Radar)</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[350px] pt-8">
+                <CardContent className="h-[400px] flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data?.neighborhoodStats || []} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" opacity={0.3} />
-                      <XAxis dataKey="neighborhood" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 10 }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b7280' }} />
-                      <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
-                      <Legend />
-                      <Bar dataKey="health" name="Saúde" stackId="a" fill="#ef4444" />
-                      <Bar dataKey="education" name="Educação" stackId="a" fill="#f97316" />
-                      <Bar dataKey="social" name="Social" stackId="a" fill="#a855f7" radius={[4, 4, 0, 0]} />
-                    </BarChart>
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                      <PolarGrid stroke="#e5e7eb" />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#6b7280', fontSize: 12, fontWeight: 'bold' }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 'auto']} hide />
+                      {neighborhoods.map((n, i) => (
+                        <Radar
+                          key={n}
+                          name={n}
+                          dataKey={n}
+                          hide={hiddenNeighborhoods.includes(n)}
+                          stroke={neighborhoodColors[i % neighborhoodColors.length]}
+                          fill={neighborhoodColors[i % neighborhoodColors.length]}
+                          fillOpacity={0.3}
+                        />
+                      ))}
+                      <Tooltip />
+                      <Legend onClick={handleNeighborhoodLegendClick} wrapperStyle={{ cursor: 'pointer' }} />
+                    </RadarChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
               <Card className="flex flex-col shadow-sm lg:col-span-2">
                 <CardHeader>
-                  <CardTitle>Análise Regional de Alertas e Inconsistências</CardTitle>
-                  <CardDescription>Comparativo por bairro (Radar)</CardDescription>
+                  <CardTitle>Volume de Casos e Alertas por Bairro</CardTitle>
+                  <CardDescription>Total vs Alertas e Inconsistências (Barras Empilhadas)</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[450px]">
+                <CardContent className="h-[450px] pt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data?.neighborhoodStats || []}>
-                      <PolarGrid stroke="#e5e7eb" />
-                      <PolarAngleAxis dataKey="neighborhood" tick={{ fill: '#6b7280', fontSize: 12 }} />
-                      <PolarRadiusAxis angle={30} domain={[0, 6]} hide />
-                      <Radar
-                        name="Total de Crianças"
-                        dataKey="totalChildren"
-                        stroke="#94a3b8"
-                        fill="#f1f5f9"
-                        fillOpacity={0.1}
-                        strokeWidth={2}
-                        strokeDasharray="4 4"
+                    <BarChart 
+                      layout="vertical" 
+                      data={data?.neighborhoodStats || []} 
+                      margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" opacity={0.3} />
+                      <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 10 }} />
+                      <YAxis 
+                        dataKey="neighborhood" 
+                        type="category" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        width={100}
+                        tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 'bold' }} 
                       />
-                      <Radar
-                        name="Crianças com Alertas"
-                        dataKey="alerts"
-                        stroke="#ef4444"
-                        fill="#ef4444"
-                        fillOpacity={0.4}
-                      />
-                      <Radar
-                        name="Crianças com Inconsistências"
-                        dataKey="inconsistencies"
-                        stroke="#ec4899"
-                        fill="#ec4899"
-                        fillOpacity={0.4}
-                      />
-                      <Tooltip />
-                      <Legend />
-                    </RadarChart>
+                      <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} />
+                      <Legend onClick={handleBarLegendClick} wrapperStyle={{ cursor: 'pointer' }} />
+                      <Bar hide={hiddenBarSeries.includes('totalChildren')} dataKey="totalChildren" name="Total de Crianças" fill="#94a3b8" radius={[0, 4, 4, 0]} />
+                      <Bar hide={hiddenBarSeries.includes('alerts')} dataKey="alerts" name="Com Alertas" stackId="status" fill="#ef4444" />
+                      <Bar hide={hiddenBarSeries.includes('inconsistencies')} dataKey="inconsistencies" name="Com Inconsistências" stackId="status" fill="#ec4899" radius={[0, 4, 4, 0]} />
+                    </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>

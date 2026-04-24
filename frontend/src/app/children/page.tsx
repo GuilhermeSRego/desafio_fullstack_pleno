@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Eye, ArrowUpDown, ArrowUp, ArrowDown, Search, Filter, ShieldAlert } from 'lucide-react';
+import { Eye, ArrowUpDown, ArrowUp, ArrowDown, Search, Filter, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { 
   Popover, 
   PopoverContent, 
@@ -40,6 +41,8 @@ function ChildrenListContent() {
   const [availableSchools, setAvailableSchools] = useState<string[]>([]);
   const [area, setArea] = useState(initialArea);
   const [temInconsistencia, setTemInconsistencia] = useState(initialTemInconsistencia);
+
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const hasActiveFilters = bairro || nome || temAlertas !== 'all' || revisado !== 'all' || selectedAlerts.length > 0 || selectedSchools.length > 0 || area !== 'all' || temInconsistencia !== 'all';
 
@@ -156,7 +159,38 @@ function ChildrenListContent() {
           </div>
         </header>
 
-        <section aria-label="Filtros de pesquisa" className="bg-white dark:bg-gray-950 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+        {/* Mobile Filter Toggle Button */}
+        <div className="md:hidden">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className={cn(
+              "w-full flex items-center justify-between font-bold h-12 rounded-xl bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 shadow-sm transition-all",
+              showMobileFilters && "border-blue-500 ring-1 ring-blue-500/20"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <Filter size={18} className={cn(showMobileFilters ? "text-blue-600" : "text-gray-400")} />
+              <span className={cn(showMobileFilters ? "text-blue-700" : "text-gray-700 dark:text-gray-300")}>
+                {showMobileFilters ? 'Ocultar Filtros' : 'Filtrar Resultados'}
+              </span>
+              {hasActiveFilters && (
+                <Badge variant="destructive" className="ml-1 px-1.5 py-0 min-w-[18px] h-[18px] flex items-center justify-center text-[10px]">
+                  !
+                </Badge>
+              )}
+            </div>
+            {showMobileFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </Button>
+        </div>
+
+        <section 
+          aria-label="Filtros de pesquisa" 
+          className={cn(
+            "bg-white dark:bg-gray-950 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 transition-all duration-300",
+            !showMobileFilters && "hidden md:grid"
+          )}
+        >
           <div className="flex flex-col gap-1.5">
             <span className="text-[10px] font-bold text-gray-400 uppercase ml-1">Nome da Criança</span>
             <div className="relative">

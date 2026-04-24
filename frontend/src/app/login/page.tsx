@@ -60,7 +60,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
-          <CardContent className="space-y-5">
+          <CardContent className="space-y-5 pb-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">E-mail Institucional</Label>
               <Input 
@@ -87,7 +87,7 @@ export default function LoginPage() {
               />
             </div>
           </CardContent>
-          <CardFooter className="pt-4 flex flex-col space-y-4">
+          <CardFooter className="pt-8 flex flex-col space-y-4">
             <Button type="submit" className="w-full h-12 text-base font-bold bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all" disabled={loading}>
               {loading ? 'Validando acesso...' : 'Entrar no Sistema'}
             </Button>
