@@ -166,7 +166,7 @@ app.get('/inconsistencies', authenticateToken, async (req: Request, res: Respons
 
       return issues.length > 0 ? { 
         id: c.id, 
-        originalId: c.id, 
+        originalId: c.originalId, 
         nome: c.nome, 
         bairro: c.bairro, 
         issues, 

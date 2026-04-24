@@ -370,15 +370,21 @@ export default function ChildDetails() {
 
             <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm overflow-hidden">
               <CardHeader className="bg-gray-50/50 dark:bg-gray-900">
-                <CardTitle className="text-lg">Histórico de Notas</CardTitle>
+                <CardTitle className="text-lg">Histórico de Revisão</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="max-h-[400px] overflow-y-auto divide-y dark:divide-gray-800">
-                  {child.reviews?.map((rev: any) => (
+                  {child.reviews?.slice().sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((rev: any) => (
                     <div key={rev.id} className="p-4 space-y-2 hover:bg-gray-50/50 dark:hover:bg-gray-900/20 transition-colors">
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] font-bold text-gray-400 uppercase">{format(new Date(rev.createdAt), "dd/MM/yy HH:mm")}</span>
-                        <Badge variant="outline" className="text-[10px] py-0">{rev.revisado_por.split('@')[0]}</Badge>
+                        <Badge 
+                          variant="outline" 
+                          className="text-[10px] py-0 cursor-help transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400"
+                          title={rev.revisado_por}
+                        >
+                          {rev.revisado_por.split('@')[0]}
+                        </Badge>
                       </div>
                       <p className="text-sm text-gray-700 dark:text-gray-300 italic leading-snug">"{rev.anotacao || 'Sem anotações'}"</p>
                       <div className="flex gap-3 text-[10px] font-medium">
