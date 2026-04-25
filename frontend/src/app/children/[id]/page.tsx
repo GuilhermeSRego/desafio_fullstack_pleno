@@ -142,12 +142,12 @@ export default function ChildDetails() {
           </div>
           
           <Dialog open={openReview} onOpenChange={setOpenReview}>
-            <DialogTrigger render={
+            <DialogTrigger asChild>
               <Button id="btn-open-revision" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 shadow-md">
                 <CheckCircle className="w-4 h-4 mr-2" />
                 {child.revisado ? 'Nova Revisão' : 'Iniciar Revisão'}
               </Button>
-            } />
+            </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto dark:bg-gray-950 dark:border-gray-800">
               <DialogHeader>
                 <DialogTitle>Atualizar Dados e Acompanhamento</DialogTitle>

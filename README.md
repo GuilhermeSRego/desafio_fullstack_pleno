@@ -175,9 +175,24 @@ O projeto conta com uma suíte de testes automatizados para garantir a estabilid
   ```
 
 ### 📋 O que foi testado?
-- **Backend (Jest + Supertest)**: Validação do endpoint `/summary`, garantindo que os cálculos de alertas e filtros de segurança (JWT) funcionem corretamente.
-- **Frontend (Jest + Testing Library)**: Testes de componente (ex: `Navbar`), validando comportamento responsivo, renderização de elementos e integração com hooks do Next.js.
-- **E2E (Playwright)**: Fluxo de autenticação, verificando se o sistema bloqueia acessos não autorizados e redireciona corretamente após o login.
+- **Backend (Jest + Supertest)**:
+  - `auth.test.ts`: Validação do fluxo de login, proteção de rotas e integridade do middleware JWT.
+  - `children.test.ts`: Testes rigorosos de filtros (bairro, área, nome), paginação no banco e detecção de inconsistências.
+  - `summary.test.ts`: Garantia da precisão nos cálculos dos cards de resumo e estatísticas do dashboard.
+- **Frontend (Jest + Testing Library)**:
+  - `Navbar.test.tsx`: Verificação de navegação, responsividade do menu e estados de logout.
+  - `ChildDetails.test.tsx`: Teste do ciclo de vida completo do prontuário, desde o carregamento de dados e renderização da barra de vida (HP Bar) até a submissão do formulário de revisão com mock de API.
+- **E2E (Playwright)**:
+  - `dashboard.spec.ts`: Simulação da **Jornada do Técnico**, cobrindo login, mapas interativos, auditoria de prontuários e alternância de temas.
+
+### 📹 Jornada do Técnico e Geração de Vídeo (E2E)
+A suíte de testes E2E está configurada para realizar a **Jornada Completa do Técnico**, simulando o uso real do sistema:
+- Navegação entre Dashboard, Estatísticas e Mapas.
+- Interação com o **Mapa de Calor** (zoom e clique em aglomerados).
+- Acesso ao prontuário e conclusão de uma **revisão técnica** com sucesso.
+- Validação visual da alternância para o **Modo Dark**.
+
+Ao final de cada execução, o Playwright gera automaticamente um **vídeo da interação**, localizado em `frontend/test-results`, permitindo validar a experiência do usuário de forma visual e auditável.
 
 ---
 
