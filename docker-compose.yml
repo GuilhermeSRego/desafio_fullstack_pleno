@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: prefeitura_db
     environment:
       POSTGRES_USER: root
@@ -12,6 +12,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d prefeitura_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
@@ -22,10 +27,12 @@ services:
       - DATABASE_URL=postgresql://root:rootpassword@db:5432/prefeitura_db?schema=public
       - JWT_SECRET=super_secret_painel_2024
       - PORT=3001
+      - NODE_ENV=production
     ports:
       - "3001:3001"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   web:
     build:
@@ -34,6 +41,7 @@ services:
     container_name: prefeitura_web
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NODE_ENV=production
     ports:
       - "3000:3000"
     depends_on:

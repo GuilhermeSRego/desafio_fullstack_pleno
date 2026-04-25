@@ -234,6 +234,7 @@ Ao final de cada execução, o Playwright gera automaticamente um **vídeo da in
 
 - **Node.js vs Go**: Optei por Node.js para garantir maior produtividade e integração total de tipos com o frontend (TS), priorizando agilidade na entrega dos requisitos complexos de UI.
 - **Prisma vs SQL**: O Prisma foi escolhido pela segurança de tipos e velocidade de desenvolvimento, facilitando a manutenção das relações entre as áreas de saúde, educação e social.
+- **PostgreSQL**: Escolhido em vez de um banco NoSQL para garantir integridade referencial e consistência ácida (ACID) entre os dados de saúde, educação e assistência, o que é fundamental em sistemas governamentais.
 - **Server Components**: Uso estratégico para reduzir o "hydration cost" no cliente, mantendo a aplicação leve para dispositivos móveis simples.
 
 ---
@@ -254,10 +255,12 @@ Ao final de cada execução, o Playwright gera automaticamente um **vídeo da in
 
 ---
 
-## 🔮 Melhorias Futuras
-- Cache de consultas pesadas com Redis.
-- Atualizações em tempo real via WebSockets.
-- Auditoria completa de alterações nos prontuários.
+## 🔮 Melhorias Futuras (O que faria com mais tempo)
+- **Cache com Redis**: Implementaria cache nos endpoints de `/summary` e `/children` para lidar com picos de acesso.
+- **Mensageria/Fila**: Uso de BullMQ para processar o recálculo de alertas em background caso a base de dados cresça exponencialmente.
+- **Observabilidade**: Logs estruturados e métricas (Prometheus/Grafana) para monitorar a saúde da API.
+- **Geolocalização Real**: Integração com APIs de mapas para geocodificação real dos endereços.
+- **Auditoria**: Sistema de logs (Audit Log) para rastrear quem alterou cada prontuário e quando.
 
 ---
 

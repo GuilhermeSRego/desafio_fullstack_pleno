@@ -16,5 +16,5 @@ RUN npm run build
 
 EXPOSE 3001
 
-# The start command should migrate the db, seed it, and start the app
-CMD npx prisma@5.20.0 db push && npm run seed && npm start
+# The start command ensures the db schema is up to date and seeded
+CMD npx prisma db push && npm run seed && npm start
