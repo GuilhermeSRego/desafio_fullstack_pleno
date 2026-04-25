@@ -4,6 +4,8 @@ Sistema full-stack desenvolvido para apoiar técnicos de campo no acompanhamento
 
 A aplicação permite identificar rapidamente casos críticos, inconsistências cadastrais e acompanhar a evolução dos atendimentos — com foco em **performance, usabilidade mobile e clareza operacional**.
 
+> **🔗 Link para Deploy Público**: [https://painel.guislab.com.br/](https://painel.guislab.com.br/)
+
 ---
 
 ## 🎯 Objetivo do Projeto
@@ -149,8 +151,9 @@ Sistema de ajuda interativo que guia o novo técnico pelas principais funcionali
    ```
 
 ### Acessos
-- **Frontend**: [http://localhost:3000](http://localhost:3000)
-- **API**: [http://localhost:3001](http://localhost:3001)
+- **🌐 Deploy Público**: [https://painel.guislab.com.br/](https://painel.guislab.com.br/)
+- **Frontend Local**: [http://localhost:3000](http://localhost:3000)
+- **API Local**: [http://localhost:3001](http://localhost:3001)
 
 ### ⚙️ Inicialização
 - O container executa migrations do Prisma automaticamente.
