@@ -143,7 +143,7 @@ export default function ChildDetails() {
           
           <Dialog open={openReview} onOpenChange={setOpenReview}>
             <DialogTrigger render={
-              <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 shadow-md">
+              <Button id="btn-open-revision" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 shadow-md">
                 <CheckCircle className="w-4 h-4 mr-2" />
                 {child.revisado ? 'Nova Revisão' : 'Iniciar Revisão'}
               </Button>
@@ -233,7 +233,7 @@ export default function ChildDetails() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm">
+            <Card id="child-prontuario-card" className="dark:bg-gray-950 dark:border-gray-800 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-2xl dark:text-gray-100 flex items-center gap-3">
                   {child.nome}
@@ -276,7 +276,7 @@ export default function ChildDetails() {
             </Card>
 
             {/* HP Bar - Vida da Criança */}
-            <Card className="p-6 bg-white dark:bg-gray-950 border-gray-100 dark:border-gray-800 shadow-sm">
+            <Card id="vitality-bar-card" className="p-6 bg-white dark:bg-gray-950 border-gray-100 dark:border-gray-800 shadow-sm">
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
                   <div>
@@ -329,7 +329,7 @@ export default function ChildDetails() {
 
             <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Saúde */}
-              <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-red-500 overflow-hidden">
+              <Card id="health-card" className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-red-500 overflow-hidden">
                 <CardHeader className="bg-red-50/30 dark:bg-red-950/10 py-3">
                   <CardTitle className="text-xs font-bold uppercase tracking-widest text-red-600 dark:text-red-400 flex items-center gap-2">
                     <HeartPulse size={14} /> Saúde
@@ -350,7 +350,7 @@ export default function ChildDetails() {
               </Card>
 
               {/* Educação */}
-              <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-orange-500 overflow-hidden">
+              <Card id="education-card" className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-orange-500 overflow-hidden">
                 <CardHeader className="bg-orange-50/30 dark:bg-orange-950/10 py-3">
                   <CardTitle className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400 flex items-center gap-2">
                     <BookOpen size={14} /> Educação
@@ -373,7 +373,7 @@ export default function ChildDetails() {
               </Card>
 
               {/* Social */}
-              <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-purple-500 overflow-hidden">
+              <Card id="social-card" className="dark:bg-gray-950 dark:border-gray-800 shadow-sm border-t-4 border-t-purple-500 overflow-hidden">
                 <CardHeader className="bg-purple-50/30 dark:bg-purple-950/10 py-3">
                   <CardTitle className="text-xs font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400 flex items-center gap-2">
                     <ShieldAlert size={14} /> Social
@@ -414,7 +414,7 @@ export default function ChildDetails() {
               </CardContent>
             </Card>
 
-            <Card className="dark:bg-gray-950 dark:border-gray-800 shadow-sm overflow-hidden">
+            <Card id="revision-history-card" className="dark:bg-gray-950 dark:border-gray-800 shadow-sm overflow-hidden">
               <CardHeader className="bg-gray-50/50 dark:bg-gray-900">
                 <CardTitle className="text-lg">Histórico de Revisão</CardTitle>
               </CardHeader>
@@ -448,7 +448,7 @@ export default function ChildDetails() {
 
             {/* Inconsistências de Registro */}
             {child.inconsistencies && (
-              <Card className="border-pink-100 dark:border-pink-900 shadow-sm overflow-hidden">
+              <Card id="inconsistencies-card" className="border-pink-100 dark:border-pink-900 shadow-sm overflow-hidden">
                 <CardHeader className="bg-pink-50/20 dark:bg-pink-950/10 py-3 border-b dark:border-pink-900/50">
                   <CardTitle className="text-sm font-bold flex items-center gap-2 text-pink-600 dark:text-pink-400 uppercase tracking-tight">
                     <ShieldAlert size={16} />

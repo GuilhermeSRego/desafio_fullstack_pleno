@@ -162,6 +162,7 @@ function ChildrenListContent() {
         {/* Mobile Filter Toggle Button */}
         <div className="md:hidden">
           <Button 
+            id="mobile-filter-toggle"
             variant="outline" 
             onClick={() => setShowMobileFilters(!showMobileFilters)}
             className={cn(
@@ -185,6 +186,7 @@ function ChildrenListContent() {
         </div>
 
         <section 
+          id="filters-section"
           aria-label="Filtros de pesquisa" 
           className={cn(
             "bg-white dark:bg-gray-950 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 transition-all duration-300",
@@ -327,10 +329,11 @@ function ChildrenListContent() {
         <section aria-label="Resultados" className="bg-white dark:bg-gray-950 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
           {/* Desktop Table View */}
           <div className="hidden md:block overflow-x-auto">
-            <Table>
+            <Table id="children-table">
               <TableHeader className="bg-gray-100/50 dark:bg-gray-900/80 border-b-2 border-gray-200 dark:border-gray-800">
                 <TableRow className="hover:bg-transparent border-none">
                   <TableHead 
+                    id="col-nome"
                     className="font-bold text-gray-900 dark:text-gray-100 cursor-pointer h-12"
                     onClick={() => toggleSort('nome')}
                   >
@@ -380,7 +383,7 @@ function ChildrenListContent() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  data.map((child) => {
+                  data.map((child, index) => {
                     const numAlertas = 
                       (child.saude?.alertas?.length || 0) + 
                       (child.educacao?.alertas?.length || 0) + 
@@ -389,7 +392,7 @@ function ChildrenListContent() {
                     const age = new Date().getFullYear() - new Date(child.data_nascimento).getFullYear();
 
                     return (
-                      <TableRow key={child.id} className="dark:border-gray-800 hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-all duration-200 group">
+                      <TableRow key={child.id} id={index === 0 ? 'child-row-0' : undefined} className="dark:border-gray-800 hover:bg-gray-50/80 dark:hover:bg-gray-900/40 transition-all duration-200 group">
                         <TableCell className="py-4">
                           <div className="flex flex-col">
                             <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
@@ -465,7 +468,7 @@ function ChildrenListContent() {
             ) : data.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">Nenhuma criança encontrada.</div>
             ) : (
-              data.map((child) => {
+              data.map((child, index) => {
                 const numAlertas = 
                   (child.saude?.alertas?.length || 0) + 
                   (child.educacao?.alertas?.length || 0) + 
@@ -474,7 +477,7 @@ function ChildrenListContent() {
                 const age = new Date().getFullYear() - new Date(child.data_nascimento).getFullYear();
 
                 return (
-                  <div key={child.id} className="p-5 space-y-5 hover:bg-gray-50 dark:hover:bg-gray-900/40 transition-all duration-300">
+                  <div key={child.id} id={index === 0 ? 'child-row-0' : undefined} className="p-5 space-y-5 hover:bg-gray-50 dark:hover:bg-gray-900/40 transition-all duration-300">
                     <div className="flex justify-between items-start gap-4">
                       <div className="space-y-1 flex-1">
                         <p className="text-lg font-black text-gray-900 dark:text-gray-100 leading-tight">

@@ -7,14 +7,16 @@ import Cookies from 'js-cookie';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
-import { LogOut, Home, Users, Menu, X } from 'lucide-react';
+import { LogOut, Home, Users, Menu, X, HelpCircle } from 'lucide-react';
 import { ModeToggle } from './ModeToggle';
 import { cn } from '@/lib/utils';
+import { useTour } from './TourProvider';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { startTour } = useTour();
 
   const handleLogout = () => {
     Cookies.remove('token');
@@ -59,6 +61,7 @@ export default function Navbar() {
               return (
                 <Link 
                   key={link.href}
+                  id={link.href === '/' ? 'nav-dashboard' : 'nav-children'}
                   href={link.href} 
                   className={cn(
                     "text-sm font-bold flex items-center gap-2 transition-all relative py-1",
@@ -75,6 +78,16 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button 
+            id="tour-start-button"
+            variant="ghost" 
+            size="icon" 
+            onClick={startTour}
+            className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors"
+            title="Ajuda / Iniciar Tour"
+          >
+            <HelpCircle size={20} />
+          </Button>
           <ModeToggle />
           <div className="hidden md:block h-6 w-px bg-gray-200 dark:bg-gray-800 mx-2" />
           <Button 
@@ -140,6 +153,15 @@ export default function Navbar() {
               </Link>
             );
           })}
+          <div className="pt-4 mt-4 border-t dark:border-gray-800">
+            <Button 
+              variant="ghost" 
+              onClick={() => { setIsOpen(false); startTour(); }}
+              className="w-full flex items-center justify-start gap-4 px-4 py-4 rounded-2xl text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+            >
+              <HelpCircle size={22} /> Iniciar Tour Guiado
+            </Button>
+          </div>
         </nav>
 
         <div className="p-6 border-t dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/10 space-y-6">

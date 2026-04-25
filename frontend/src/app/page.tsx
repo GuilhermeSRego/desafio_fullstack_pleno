@@ -125,6 +125,7 @@ export default function Dashboard() {
           </div>
           <Link href="/children" passHref className="w-full sm:w-auto">
             <Button 
+              id="nav-base-alunos"
               variant="outline"
               className="w-full sm:w-auto bg-white dark:bg-gray-950 border-2 border-blue-100 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-700 dark:hover:text-white font-medium h-12 px-6 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-blue-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2" 
               aria-label="Navegar para a base de alunos"
@@ -135,7 +136,7 @@ export default function Dashboard() {
           </Link>
         </header>
 
-        <section aria-label="Métricas principais" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+        <section id="indicators-section" aria-label="Métricas principais" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
           <Link href="/children" className="block transition-all hover:scale-[1.02] active:scale-[0.98]">
             <Card className="bg-white dark:bg-gray-950 h-full cursor-pointer hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -211,13 +212,13 @@ export default function Dashboard() {
 
         <Tabs defaultValue="priority" className="w-full">
           <TabsList className="flex md:grid w-full md:grid-cols-3 mb-8 h-auto md:h-12 bg-gray-100/50 dark:bg-gray-800/50 p-1 overflow-x-auto whitespace-nowrap md:overflow-visible">
-            <TabsTrigger value="priority" className="flex-1 flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm px-4 py-2">
+            <TabsTrigger id="tab-priority" value="priority" className="flex-1 flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm px-4 py-2">
               <ClipboardCheck className="w-4 h-4" /> <span className="hidden sm:inline">Gestão de Casos e Alertas</span><span className="sm:hidden">Casos</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex-1 flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm px-4 py-2">
+            <TabsTrigger id="tab-analytics" value="analytics" className="flex-1 flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm px-4 py-2">
               <PieChartIcon className="w-4 h-4" /> <span className="hidden sm:inline">Panorama e Estatísticas</span><span className="sm:hidden">Análise</span>
             </TabsTrigger>
-            <TabsTrigger value="map" className="flex-1 flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm px-4 py-2">
+            <TabsTrigger id="tab-map" value="map" className="flex-1 flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm px-4 py-2">
               <MapIcon className="w-4 h-4" /> <span className="hidden sm:inline">Distribuição Geográfica</span><span className="sm:hidden">Mapa</span>
             </TabsTrigger>
           </TabsList>
