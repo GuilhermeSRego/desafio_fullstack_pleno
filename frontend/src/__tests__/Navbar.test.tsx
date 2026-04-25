@@ -8,6 +8,15 @@ jest.mock('next/navigation', () => ({
       push: jest.fn(),
     };
   },
+  usePathname() {
+    return '/';
+  },
+}));
+
+jest.mock('../components/TourProvider', () => ({
+  useTour: () => ({
+    startTour: jest.fn(),
+  }),
 }));
 
 jest.mock('next-themes', () => ({
@@ -22,18 +31,21 @@ jest.mock('next-themes', () => ({
 describe('Navbar Component', () => {
   it('deve renderizar o logo da Prefeitura', () => {
     render(<Navbar />);
-    const logo = screen.getByText(/Prefeitura Rio/i);
+    const logo = screen.getByAltText(/Prefeitura Rio/i);
     expect(logo).toBeInTheDocument();
   });
 
   it('deve renderizar os links de navegação principal', () => {
     render(<Navbar />);
-    expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
-    expect(screen.getByText(/Crianças/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Dashboard/i)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/Crianças/i)[0]).toBeInTheDocument();
   });
 
   it('deve conter botão de Sair', () => {
     render(<Navbar />);
-    expect(screen.getByRole('button', { name: /Sair da conta/i })).toBeInTheDocument();
+    // Tem dois botões (desktop e mobile)
+    const logoutButtons = screen.getAllByRole('button', { name: /Sair da conta/i });
+    expect(logoutButtons.length).toBeGreaterThan(0);
+    expect(logoutButtons[0]).toBeInTheDocument();
   });
 });

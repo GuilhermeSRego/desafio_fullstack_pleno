@@ -6,7 +6,10 @@ import { PrismaClient } from '@prisma/client';
 // Mock PrismaClient
 jest.mock('@prisma/client', () => {
   const mPrismaClient = {
-    child: { count: jest.fn() },
+    child: { 
+      count: jest.fn(),
+      findMany: jest.fn(() => Promise.resolve([])),
+    },
     healthData: { count: jest.fn() },
     educationData: { count: jest.fn() },
     socialData: { count: jest.fn() },
@@ -53,6 +56,10 @@ describe('GET /summary', () => {
       educationAlerts: 7,
       socialAlerts: 3,
       reviewed: 5,
+      criticalCases: [],
+      inconsistencyCount: 0,
+      neighborhoodStats: [],
+      schools: [],
     });
   });
 });

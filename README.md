@@ -154,6 +154,33 @@ Sistema de ajuda interativo que guia o novo técnico pelas principais funcionali
 
 ---
 
+## 🧪 Testes e Qualidade
+
+O projeto conta com uma suíte de testes automatizados para garantir a estabilidade das regras de negócio e da interface. Para facilitar a execução, foi implementado um **redirecionamento de comandos na raiz**, permitindo rodar os testes de ambos os pacotes sem sair da pasta principal.
+
+### 🛠️ Comandos Disponíveis (Na Raiz)
+
+- **Rodar todos os testes unitários/componente:**
+  ```bash
+  npm test
+  ```
+- **Rodar testes de E2E (Playwright):**
+  ```bash
+  npm run test:e2e
+  ```
+- **Rodar especificamente Backend ou Frontend:**
+  ```bash
+  npm run test:backend
+  npm run test:frontend
+  ```
+
+### 📋 O que foi testado?
+- **Backend (Jest + Supertest)**: Validação do endpoint `/summary`, garantindo que os cálculos de alertas e filtros de segurança (JWT) funcionem corretamente.
+- **Frontend (Jest + Testing Library)**: Testes de componente (ex: `Navbar`), validando comportamento responsivo, renderização de elementos e integração com hooks do Next.js.
+- **E2E (Playwright)**: Fluxo de autenticação, verificando se o sistema bloqueia acessos não autorizados e redireciona corretamente após o login.
+
+---
+
 ## 📊 Status de Implementação
 
 - [x] Autenticação JWT
@@ -167,6 +194,9 @@ Sistema de ajuda interativo que guia o novo técnico pelas principais funcionali
 - [x] Onboarding guiado e interativo (Tour)
 - [x] Responsividade completa (375px a 1440px)
 - [x] Dark Mode e Acessibilidade (WCAG AA)
+- [x] Testes Unitários no Backend (Jest)
+- [x] Testes de Componente no Frontend (RTL)
+- [x] Testes E2E (Playwright)
 
 ---
 
@@ -195,7 +225,6 @@ Sistema de ajuda interativo que guia o novo técnico pelas principais funcionali
 ---
 
 ## 🔮 Melhorias Futuras
-- Implementação de Testes E2E com Playwright.
 - Cache de consultas pesadas com Redis.
 - Atualizações em tempo real via WebSockets.
 - Auditoria completa de alterações nos prontuários.

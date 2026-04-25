@@ -26,9 +26,8 @@ test.describe('Login Flow', () => {
     await page.fill('input[type="password"]', 'painel@2024');
     await page.click('button[type="submit"]');
 
-    // Após login, aguardar o redirecionamento ou cookie
-    await page.waitForLoadState('networkidle');
-    await expect(page).toHaveURL(/.*\/login/); // Se mockamos o token mas o middleware do next.js tentar validar na real, pode falhar o redirecionamento em mock. 
-    // Como o auth depende de setar o cookie, podemos apenas testar o form:
+    // Após login, aguardar o redirecionamento
+    await page.waitForURL('**/');
+    await expect(page).toHaveURL(/.*\//);
   });
 });
