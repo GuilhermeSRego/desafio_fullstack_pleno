@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { TourProvider } from "@/components/TourProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AccessibilityProvider } from "@/components/AccessibilityProvider";
+import VLibras from "@/components/VLibras";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,19 +23,22 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            <TourProvider>
-              {children}
-              <Toaster position="top-right" richColors />
-            </TourProvider>
-          </TooltipProvider>
-        </ThemeProvider>
+        <AccessibilityProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            <TooltipProvider>
+              <TourProvider>
+                {children}
+                <Toaster position="top-right" richColors />
+                <VLibras />
+              </TourProvider>
+            </TooltipProvider>
+          </ThemeProvider>
+        </AccessibilityProvider>
       </body>
     </html>
   );

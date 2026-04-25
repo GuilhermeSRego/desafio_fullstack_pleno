@@ -47,6 +47,7 @@ A aplicação foi desenhada sob os princípios de **Separação de Preocupaçõe
 - **Tailwind CSS**: Estilização rápida e consistente com CSS otimizado.
 - **shadcn/ui & Radix UI**: Componentes acessíveis e modernos (incluindo Tooltips e Popovers).
 - **Axios**: Cliente HTTP para comunicação performática com o backend.
+- **VLibras**: Widget oficial de acessibilidade para tradução automática em Libras.
 
 ### 📊 Visualização de Dados
 
@@ -135,6 +136,11 @@ Sistema de ajuda interativo que guia o novo técnico pelas principais funcionali
 - Uso rigoroso de `aria-labels` e HTML semântico.
 - Conformidade com **WCAG AA**.
 - **Dark Mode** nativo para redução de fadiga visual.
+- **VLibras**: Integração com o widget oficial para tradução em Língua Brasileira de Sinais.
+- **🔊 Leitura de Voz Inteligente**: Motor de síntese de voz com segmentação por frases e pausas naturais entre células de tabelas e seções.
+- **🎯 Apontar e Ler**: Modo interativo de leitura por toque ou hover, com destaque visual (outline) no elemento em foco.
+- **🔍 Escala de Fonte**: Ajuste dinâmico do tamanho dos textos (80% a 150%) com persistência de preferência.
+- **📱 Interface Adaptativa**: Agrupamento de ferramentas de acessibilidade em menus colapsáveis para otimização de espaço em dispositivos móveis.
 
 ---
 
@@ -227,7 +233,9 @@ Ao final de cada execução, o Playwright gera automaticamente um **vídeo da in
 - [x] Registro de revisão técnica
 - [x] Onboarding guiado e interativo (Tour)
 - [x] Responsividade completa (375px a 1440px)
-- [x] Dark Mode e Acessibilidade (WCAG AA)
+- [x] Dark Mode e Temas (Light/Dark)
+- [x] Acessibilidade: VLibras, Leitura de Voz e Apontar e Ler
+- [x] Acessibilidade: Escala de fonte dinâmica
 - [x] Testes Unitários no Backend (Jest)
 - [x] Testes de Componente no Frontend (RTL)
 - [x] Testes E2E (Playwright)

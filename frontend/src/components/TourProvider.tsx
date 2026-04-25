@@ -21,6 +21,23 @@ interface TourContextType {
 
 const TourContext = createContext<TourContextType | undefined>(undefined);
 
+const CustomBeacon = (props: any) => (
+  <button 
+    {...props} 
+    className="relative flex items-center group transition-all"
+    title="Clique para continuar o tour"
+  >
+    <span className="absolute flex h-8 w-8">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+      <span className="relative inline-flex rounded-full h-8 w-8 bg-blue-600 border-2 border-white shadow-md"></span>
+    </span>
+    <div className="ml-10 bg-blue-600 text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-xl whitespace-nowrap transform transition-transform group-hover:scale-110 flex items-center gap-1.5 border border-white/20">
+      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+      CLIQUE AQUI PARA CONTINUAR
+    </div>
+  </button>
+);
+
 export const useTour = () => {
   const context = useContext(TourContext);
   if (!context) throw new Error('useTour must be used within a TourProvider');
@@ -31,6 +48,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [finishedOpen, setFinishedOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -42,19 +60,46 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       if (!tourActive) setWelcomeOpen(true);
     }
 
-    // Small delay to ensure DOM is ready on route change
-    const timer = setTimeout(() => {
+    const checkElementAndStart = (attempts = 0) => {
       const tourActive = localStorage.getItem('tour_active') === 'true';
-      const savedIndex = parseInt(localStorage.getItem('tour_step_index') || '0', 10);
       const tourCompleted = localStorage.getItem('tour_completed') === 'true';
+      const savedIndex = parseInt(localStorage.getItem('tour_step_index') || '0', 10);
 
-      if (tourActive && !tourCompleted) {
+      if (!tourActive || tourCompleted) return;
+
+      // Targets for page transitions
+      const targets = [
+        '#filters-section', 
+        '#mobile-filter-toggle', 
+        '#child-prontuario-card'
+      ];
+      
+      const found = targets.some(selector => {
+        const el = document.querySelector(selector);
+        return el && (el as HTMLElement).offsetParent !== null; // Check if visible
+      });
+
+      if (found || attempts > 20) { // Max 2 seconds of polling
         setStepIndex(savedIndex);
         setRun(true);
+      } else {
+        setTimeout(() => checkElementAndStart(attempts + 1), 100);
       }
-    }, 600); // Increased to 600ms for safety
-    
-    return () => clearTimeout(timer);
+    };
+
+    if (pathname !== '/') {
+      checkElementAndStart();
+    } else {
+      const timer = setTimeout(() => {
+        const tourActive = localStorage.getItem('tour_active') === 'true';
+        const savedIndex = parseInt(localStorage.getItem('tour_step_index') || '0', 10);
+        if (tourActive) {
+          setStepIndex(savedIndex);
+          setRun(true);
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
   }, [pathname]);
 
   const startTour = () => {
@@ -73,7 +118,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     setRun(false);
   };
 
-  const steps: Step[] = [
+  const steps: any[] = [
     // DASHBOARD (0-6)
     {
       target: '#indicators-section',
@@ -114,9 +159,12 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     },
     // CHILDREN LIST (8-10)
     {
-      target: '#filters-section, #mobile-filter-toggle',
+      target: '#filters-section',
       content: 'Use os filtros avançados para encontrar crianças por nome, bairro, escola ou tipo de alerta.',
       placement: 'bottom',
+      disableBeacon: false,
+      disableOverlay: true,
+      beaconComponent: CustomBeacon,
     },
     {
       target: '#col-nome',
@@ -133,6 +181,9 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       target: '#child-prontuario-card',
       content: 'Aqui estão os dados cadastrais básicos e o contato do responsável.',
       placement: 'bottom',
+      disableBeacon: false,
+      disableOverlay: true,
+      beaconComponent: CustomBeacon,
     },
     {
       target: '#vitality-bar-card',
@@ -174,7 +225,12 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
   const handleJoyrideCallback = (data: EventData) => {
     const { status, type, index, action } = data;
     
-    if (([STATUS.FINISHED, STATUS.SKIPPED] as string[]).includes(status)) {
+    if (status === STATUS.FINISHED) {
+      setRun(false);
+      localStorage.setItem('tour_active', 'false');
+      localStorage.setItem('tour_completed', 'true');
+      setFinishedOpen(true);
+    } else if (status === STATUS.SKIPPED) {
       setRun(false);
       localStorage.setItem('tour_active', 'false');
       localStorage.setItem('tour_completed', 'true');
@@ -246,6 +302,41 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
                 className="w-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 font-bold"
               >
                 Não, obrigado. Pular para sempre.
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={finishedOpen} onOpenChange={setFinishedOpen}>
+        <DialogContent className="sm:max-w-md bg-white dark:bg-gray-950 border-none shadow-2xl rounded-3xl p-0 overflow-hidden">
+          <div className="relative h-32 bg-green-600 flex items-center justify-center overflow-hidden">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
+            <div className="relative z-10 text-center">
+              <h3 className="text-2xl font-black text-white tracking-tight uppercase">Tour Finalizado!</h3>
+              <p className="text-green-100 text-xs font-bold uppercase tracking-widest opacity-80">Pronto para começar</p>
+            </div>
+          </div>
+          
+          <div className="p-8 space-y-6">
+            <div className="space-y-3">
+              <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 text-center leading-tight">
+                O tour acabou!
+              </h4>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center leading-relaxed font-medium">
+                Esperamos que este painel seja muito útil no seu dia a dia de acompanhamento. Bom uso do sistema!
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1">
+              <Button 
+                onClick={() => {
+                  setFinishedOpen(false);
+                  router.push('/');
+                }} 
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold h-12 rounded-xl shadow-lg shadow-green-600/20 transition-all active:scale-95"
+              >
+                Finalizar e ir para o Início
               </Button>
             </div>
           </div>

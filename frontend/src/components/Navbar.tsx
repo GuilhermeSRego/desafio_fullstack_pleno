@@ -7,16 +7,29 @@ import Cookies from 'js-cookie';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
-import { LogOut, Home, Users, Menu, X, HelpCircle } from 'lucide-react';
+import { LogOut, Home, Users, Menu, X, HelpCircle, Volume2, VolumeX, Type, Accessibility, ChevronDown, MousePointer2, Touchpad } from 'lucide-react';
 import { ModeToggle } from './ModeToggle';
 import { cn } from '@/lib/utils';
 import { useTour } from './TourProvider';
+import { useAccessibility } from './AccessibilityProvider';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { startTour } = useTour();
+  const { 
+    fontSize, 
+    increaseFontSize, 
+    decreaseFontSize, 
+    isSpeaking, 
+    toggleSpeech,
+    isPointAndReadActive,
+    togglePointAndRead
+  } = useAccessibility();
 
   const handleLogout = () => {
     Cookies.remove('token');
@@ -33,7 +46,6 @@ export default function Navbar() {
       <header className="sticky top-0 z-40 w-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-md shadow-sm border-b px-4 py-3 flex items-center justify-between transition-colors">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            {/* Hamburger Button for Mobile */}
             <Button 
               variant="ghost" 
               size="icon" 
@@ -78,17 +90,87 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button 
-            id="tour-start-button"
-            variant="ghost" 
-            size="icon" 
-            onClick={startTour}
-            className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors"
-            title="Ajuda / Iniciar Tour"
-          >
-            <HelpCircle size={20} />
-          </Button>
-          <ModeToggle />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  id="tour-start-button"
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={startTour}
+                  className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg transition-colors"
+                >
+                  <HelpCircle size={20} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Ajuda / Iniciar Tour</TooltipContent>
+            </Tooltip>
+
+            {/* Accessibility Dropdown Desktop */}
+            <div className="hidden lg:block">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="flex items-center gap-2 text-gray-500 hover:text-blue-600 font-bold"
+                  >
+                    <Accessibility size={20} />
+                    <span>Acessibilidade</span>
+                    <ChevronDown size={14} className="opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-4 flex flex-col gap-5 shadow-xl border-gray-200 dark:border-gray-800" align="end">
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Modos de Leitura</p>
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={toggleSpeech}
+                        className={cn(
+                          "w-full justify-start gap-3 rounded-xl font-bold h-11",
+                          isSpeaking ? "bg-blue-50 border-blue-200 text-blue-600" : "text-gray-600 dark:text-gray-300"
+                        )}
+                      >
+                        {isSpeaking ? <Volume2 size={18} /> : <VolumeX size={18} />}
+                        {isSpeaking ? "Parar leitura" : "Ouvir tudo"}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={togglePointAndRead}
+                        className={cn(
+                          "w-full justify-start gap-3 rounded-xl font-bold h-11",
+                          isPointAndReadActive ? "bg-orange-50 border-orange-200 text-orange-600" : "text-gray-600 dark:text-gray-300"
+                        )}
+                      >
+                        <MousePointer2 size={18} />
+                        {isPointAndReadActive ? "Parar Apontar" : "Apontar e Ler"}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Tamanho da Fonte</p>
+                    <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-1 rounded-xl border">
+                      <Button variant="ghost" size="icon" onClick={decreaseFontSize} className="h-9 w-9 rounded-lg"><Type size={14} /></Button>
+                      <span className="text-xs font-bold w-12 text-center">{fontSize}%</span>
+                      <Button variant="ghost" size="icon" onClick={increaseFontSize} className="h-9 w-9 rounded-lg"><Type size={18} /></Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <ModeToggle />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Modo Escuro</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           <div className="hidden md:block h-6 w-px bg-gray-200 dark:bg-gray-800 mx-2" />
           <Button 
             variant="ghost" 
@@ -133,7 +215,7 @@ export default function Navbar() {
           </Button>
         </div>
 
-        <nav className="flex-1 px-4 py-8 space-y-3">
+        <nav className="flex-1 px-4 py-8 space-y-3 overflow-y-auto">
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
@@ -153,7 +235,56 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <div className="pt-4 mt-4 border-t dark:border-gray-800">
+          
+          <div className="pt-4 mt-4 border-t dark:border-gray-800 space-y-2">
+            <Button 
+              variant="ghost"
+              onClick={() => setIsAccessibilityOpen(!isAccessibilityOpen)}
+              className="w-full flex items-center justify-between px-4 py-4 rounded-2xl text-[10px] font-black text-gray-400 uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-900"
+            >
+              <div className="flex items-center gap-2">
+                <Accessibility size={16} />
+                <span>Acessibilidade</span>
+              </div>
+              <ChevronDown size={16} className={cn("transition-transform", isAccessibilityOpen && "rotate-180")} />
+            </Button>
+            
+            {isAccessibilityOpen && (
+              <div className="px-4 pb-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
+                <Button 
+                  variant="outline" 
+                  onClick={toggleSpeech}
+                  className={cn(
+                    "w-full flex items-center gap-3 justify-start px-4 h-12 rounded-xl font-bold transition-all",
+                    isSpeaking ? "bg-blue-100 border-blue-200 text-blue-600" : "text-gray-600 dark:text-gray-400"
+                  )}
+                >
+                  {isSpeaking ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                  {isSpeaking ? 'Parar Leitura' : 'Ouvir Tudo'}
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  onClick={togglePointAndRead}
+                  className={cn(
+                    "w-full flex items-center gap-3 justify-start px-4 h-12 rounded-xl font-bold transition-all",
+                    isPointAndReadActive ? "bg-orange-100 border-orange-200 text-orange-600" : "text-gray-600 dark:text-gray-400"
+                  )}
+                >
+                  <MousePointer2 size={20} />
+                  {isPointAndReadActive ? 'Parar Apontar' : 'Apontar e Ler'}
+                </Button>
+
+                <div className="bg-gray-100 dark:bg-gray-900 p-3 rounded-xl space-y-2">
+                  <span className="text-[10px] font-black text-gray-500 uppercase">Tamanho da Fonte: {fontSize}%</span>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" className="flex-1 bg-white dark:bg-gray-800 h-10 rounded-lg shadow-sm" onClick={decreaseFontSize}><Type size={14} /> Menor</Button>
+                    <Button variant="ghost" className="flex-1 bg-white dark:bg-gray-800 h-10 rounded-lg shadow-sm" onClick={increaseFontSize}><Type size={18} /> Maior</Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <Button 
               variant="ghost" 
               onClick={() => { setIsOpen(false); startTour(); }}
