@@ -126,14 +126,14 @@ test.describe('Fluxo do Painel de Monitoramento', () => {
     });
 
     // Garantir que o localStorage seja setado na origem correta
-    await page.goto('http://localhost:3005/');
+    await page.goto('/');
     await page.evaluate(() => {
       localStorage.setItem('tour_completed', 'true');
       localStorage.setItem('tour_active', 'false');
     });
 
     // Realizar login
-    await page.goto('http://localhost:3005/login');
+    await page.goto('/login');
     await page.fill('input[type="email"]', 'tecnico@prefeitura.rio');
     await page.waitForTimeout(500);
     await page.fill('input[type="password"]', 'painel@2024');

@@ -28,6 +28,28 @@ jest.mock('../components/ui/dialog', () => ({
   DialogFooter: ({ children }: any) => <div data-testid="dialog-footer">{children}</div>,
 }));
 
+jest.mock('../components/ui/tooltip', () => ({
+  Tooltip: ({ children }: any) => <div data-testid="tooltip-root">{children}</div>,
+  TooltipTrigger: ({ children }: any) => <div data-testid="tooltip-trigger">{children}</div>,
+  TooltipContent: ({ children }: any) => <div data-testid="tooltip-content">{children}</div>,
+  TooltipProvider: ({ children }: any) => <>{children}</>,
+}));
+
+jest.mock('../components/AccessibilityProvider', () => ({
+  useAccessibility: () => ({
+    fontSize: 100,
+    increaseFontSize: jest.fn(),
+    decreaseFontSize: jest.fn(),
+    resetFontSize: jest.fn(),
+    isSpeaking: false,
+    toggleSpeech: jest.fn(),
+    isPointAndReadActive: false,
+    togglePointAndRead: jest.fn(),
+    speak: jest.fn(),
+    stopSpeech: jest.fn(),
+  }),
+}));
+
 jest.mock('next-themes', () => ({
   useTheme: () => ({ theme: 'light', setTheme: jest.fn() }),
 }));
@@ -75,6 +97,7 @@ jest.mock('lucide-react', () => {
     AlertTriangle: MockIcon,
     HeartPulse: MockIcon,
     BookOpen: MockIcon,
+    Info: MockIcon,
   };
 });
 
@@ -137,8 +160,8 @@ describe('ChildDetails Page', () => {
     
     await waitFor(() => {
       expect(screen.getByText(/Status de Acompanhamento/i)).toBeInTheDocument();
-      // O HP bar usa cores/texto baseados no status
-      expect(screen.getByText(/Atenção/i)).toBeInTheDocument();
+      // O HP bar usa cores/texto baseados no status. Temos mais de um "Atenção" por causa do tooltip.
+      expect(screen.getAllByText(/Atenção/i)[0]).toBeInTheDocument();
     });
   });
 

@@ -19,6 +19,21 @@ jest.mock('../components/TourProvider', () => ({
   }),
 }));
 
+jest.mock('../components/AccessibilityProvider', () => ({
+  useAccessibility: () => ({
+    fontSize: 100,
+    increaseFontSize: jest.fn(),
+    decreaseFontSize: jest.fn(),
+    resetFontSize: jest.fn(),
+    isSpeaking: false,
+    toggleSpeech: jest.fn(),
+    isPointAndReadActive: false,
+    togglePointAndRead: jest.fn(),
+    speak: jest.fn(),
+    stopSpeech: jest.fn(),
+  }),
+}));
+
 jest.mock('next-themes', () => ({
   useTheme() {
     return {

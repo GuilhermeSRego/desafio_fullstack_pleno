@@ -7,6 +7,19 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 // Mock Prisma para evitar logs de erro no console durante testes do middleware
 jest.mock('@prisma/client', () => {
   const mPrismaClient = {
+    user: { 
+      findUnique: jest.fn().mockImplementation(({ where }) => {
+        if (where.email === 'tecnico@prefeitura.rio') {
+          // A senha 'painel@2024' hasheada com bcrypt
+          return Promise.resolve({
+            id: 1,
+            email: 'tecnico@prefeitura.rio',
+            password: require('bcryptjs').hashSync('painel@2024', 10)
+          });
+        }
+        return Promise.resolve(null);
+      })
+    },
     child: { count: jest.fn().mockResolvedValue(0), findMany: jest.fn().mockResolvedValue([]) },
     healthData: { count: jest.fn().mockResolvedValue(0) },
     educationData: { count: jest.fn().mockResolvedValue(0) },
