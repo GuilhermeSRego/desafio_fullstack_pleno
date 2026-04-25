@@ -36,13 +36,14 @@ A aplicação foi desenhada sob os princípios de **Separação de Preocupaçõe
 - **TypeScript**: Tipagem forte, resultando em menos erros em runtime e compartilhamento de contratos com frontend.
 - **Prisma ORM + PostgreSQL**: Integridade relacional entre áreas, migrations automatizadas e cliente Type-safe.
 - **JWT (JsonWebToken)**: Autenticação stateless com token contendo `preferred_username`.
+- **Bcryptjs**: Criptografia de senhas (Hashing) para armazenamento seguro no banco de dados.
 - **Zod**: Validação de esquemas e contratos de dados para garantir integridade nas escritas.
 
 ### 🎨 Frontend — Next.js 14 + TypeScript
 
 - **Next.js (App Router)**: Server Components para melhor performance e menor carga de JS no cliente.
 - **Tailwind CSS**: Estilização rápida e consistente com CSS otimizado.
-- **shadcn/ui**: Componentes acessíveis e modernos sem vendor lock-in.
+- **shadcn/ui & Radix UI**: Componentes acessíveis e modernos (incluindo Tooltips e Popovers).
 - **Axios**: Cliente HTTP para comunicação performática com o backend.
 
 ### 📊 Visualização de Dados
@@ -207,7 +208,7 @@ A suíte de testes E2E está configurada para realizar a **Jornada Completa do T
 Ao final de cada execução, o Playwright gera automaticamente um **vídeo da interação**, localizado em `frontend/test-results`, permitindo validar a experiência do usuário de forma visual e auditável.
 
 #### 🎬 Demonstração da Jornada (E2E)
-![Demonstração E2E](https://via.placeholder.com/800x450.png?text=Link+do+seu+GIF+aqui)
+![Demonstração E2E](https://guislab.com/video.gif)
 
 ---
 

@@ -429,7 +429,7 @@ function ChildrenListContent() {
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900/50 dark:text-green-400 font-bold px-3 py-1 min-w-[80px] justify-center">
-                                Tudo OK
+                                Sem Alertas
                               </Badge>
                             )}
                             <div className="w-6 shrink-0" />
@@ -518,7 +518,7 @@ function ChildrenListContent() {
                         ) : (
                           <div className="flex items-center text-green-600 dark:text-green-400 font-bold text-sm">
                             <span className="w-2 h-2 bg-green-600 rounded-full mr-2" />
-                            Tudo em Dia
+                            Sem Alertas
                           </div>
                         )}
                       </div>

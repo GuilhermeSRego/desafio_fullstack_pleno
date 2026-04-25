@@ -24,6 +24,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input as UiInput } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from 'lucide-react';
+import {
   LineChart,
   Line,
   XAxis,
@@ -280,7 +286,25 @@ export default function ChildDetails() {
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
                   <div>
-                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Status de Acompanhamento</h3>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Status de Acompanhamento</h3>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info size={14} className="text-gray-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs p-4 space-y-2">
+                          <p className="font-bold border-b pb-1 mb-1">Como funciona a Vitalidade?</p>
+                          <p className="text-[11px] leading-relaxed">
+                            <span className="text-green-500 font-bold">100%:</span> Nenhum alerta ativo. <br/>
+                            <span className="text-yellow-500 font-bold">60-80%:</span> 1 a 2 alertas (Atenção). <br/>
+                            <span className="text-red-500 font-bold">Abaixo de 60%:</span> 3+ alertas (Crítico).
+                          </p>
+                          <p className="text-[11px] leading-relaxed italic border-t pt-2">
+                            <span className="text-pink-500 font-bold">Sombra Pulsante:</span> Indica inconsistências no prontuário que exigem revisão cadastral imediata.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <p className="text-2xl font-black text-gray-900 dark:text-gray-100">
                       {numAlertas === 0 
                         ? (child.inconsistencies ? 'Comprometido' : 'Excelente') 
@@ -298,7 +322,7 @@ export default function ChildDetails() {
                   <div 
                     className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out flex ${
                       numAlertas === 0 ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]' :
-                      numAlertas <= 2 ? 'bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)]' :
+                      numAlertas <= 2 ? 'bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.4)]' :
                       'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]'
                     }`}
                     style={{ width: `${Math.max(5, 100 - (numAlertas * 20))}%` }}
@@ -306,9 +330,8 @@ export default function ChildDetails() {
                     {/* Inconsistency Segment (Pink) */}
                     {child.inconsistencies && (
                       <div 
-                        className="h-full bg-pink-500 animate-pulse" 
+                        className="h-full bg-pink-500/80 animate-pulse" 
                         style={{ width: '30%' }} 
-                        title="Inconsistência de dados detectada"
                       />
                     )}
                   </div>

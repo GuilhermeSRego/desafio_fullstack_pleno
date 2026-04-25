@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { TourProvider } from "@/components/TourProvider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,14 +23,16 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
-          <TourProvider>
-            {children}
-            <Toaster position="top-right" richColors />
-          </TourProvider>
+          <TooltipProvider>
+            <TourProvider>
+              {children}
+              <Toaster position="top-right" richColors />
+            </TourProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
