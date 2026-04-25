@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -15,8 +16,24 @@ async function main() {
   const data = JSON.parse(fs.readFileSync(seedFilePath, 'utf-8'));
 
   console.log('Cleaning database...');
+  await prisma.reviewHistory.deleteMany();
+  await prisma.healthData.deleteMany();
+  await prisma.educationData.deleteMany();
+  await prisma.socialData.deleteMany();
   await prisma.child.deleteMany();
+  await prisma.user.deleteMany();
   console.log('Database cleaned.');
+
+  console.log('Creating default user...');
+  const hashedPassword = await bcrypt.hash('painel@2024', 10);
+  await prisma.user.create({
+    data: {
+      email: 'tecnico@prefeitura.rio',
+      password: hashedPassword,
+      name: 'Técnico de Campo'
+    }
+  });
+  console.log('Default user created.');
 
   console.log(`Starting seed with ${data.length} records...`);
 

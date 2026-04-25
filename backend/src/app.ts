@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
@@ -88,13 +89,29 @@ const getInconsistenciesForChild = (c: any) => {
 };
 
 // POST /auth/token
-app.post('/auth/token', (req: Request, res: Response): any => {
-  const { email, password } = req.body;
-  if (email === 'tecnico@prefeitura.rio' && password === 'painel@2024') {
+app.post('/auth/token', async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { email, password } = req.body;
+    
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
     const token = jwt.sign({ preferred_username: email }, JWT_SECRET, { expiresIn: '8h' });
     return res.json({ token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-  return res.status(401).json({ error: 'Invalid credentials' });
 });
 
 // GET /summary
