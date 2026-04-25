@@ -13,8 +13,8 @@ import logo from '@/assets/logo.png';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('tecnico@prefeitura.rio');
-  const [password, setPassword] = useState('painel@2024');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -69,7 +69,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="tecnico@prefeitura.rio"
+                placeholder="Digite seu e-mail"
                 className="h-12 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-500 transition-all"
               />
             </div>
@@ -83,6 +83,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                placeholder="Digite sua senha"
                 className="h-12 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 focus:ring-2 focus:ring-blue-500 transition-all"
               />
             </div>

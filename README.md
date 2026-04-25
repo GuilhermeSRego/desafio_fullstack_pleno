@@ -19,12 +19,12 @@ Construir um painel funcional que permita:
 
 ## 🧱 Arquitetura da Solução
 
-A aplicação segue uma arquitetura **full-stack desacoplada**, dividida em:
+A aplicação foi desenhada sob os princípios de **Separação de Preocupações (SoC)** e **Alta Coesão**, estruturada em camadas que garantem manutenibilidade e escalabilidade:
 
-- **Backend (API REST)** → Regras de negócio, autenticação e persistência  
-- **Frontend (Next.js)** → Interface, UX e consumo da API  
-- **Banco de Dados (PostgreSQL)** → Armazenamento relacional  
-- **Docker Compose** → Orquestração do ambiente  
+- **🔙 Camada de Serviço (Backend)**: API REST desenvolvida em Node.js com TypeScript. Implementa lógica de negócio complexa para recálculo de alertas, detecção de inconsistências em tempo real e gestão de autenticação **Stateless via JWT**.
+- **🎨 Camada de Apresentação (Frontend)**: Arquitetura baseada em **Next.js 14 (App Router)**, utilizando uma estratégia híbrida de *Server Components* (para performance e SEO) e *Client Components* (para interatividade avançada com Mapas e Gráficos).
+- **🗄️ Camada de Dados (Persistência)**: Banco de dados relacional **PostgreSQL** orquestrado pelo **Prisma ORM**. A arquitetura utiliza **Transações Atômicas** para garantir a integridade dos dados durante registros complexos de revisões técnicas.
+- **🐳 Camada de Infraestrutura**: Ecossistema totalmente containerizado via **Docker**, garantindo paridade entre ambientes de desenvolvimento e produção através de redes virtuais isoladas para API e Banco de Dados.
 
 ---
 
@@ -36,12 +36,14 @@ A aplicação segue uma arquitetura **full-stack desacoplada**, dividida em:
 - **TypeScript**: Tipagem forte, resultando em menos erros em runtime e compartilhamento de contratos com frontend.
 - **Prisma ORM + PostgreSQL**: Integridade relacional entre áreas, migrations automatizadas e cliente Type-safe.
 - **JWT (JsonWebToken)**: Autenticação stateless com token contendo `preferred_username`.
+- **Zod**: Validação de esquemas e contratos de dados para garantir integridade nas escritas.
 
 ### 🎨 Frontend — Next.js 14 + TypeScript
 
 - **Next.js (App Router)**: Server Components para melhor performance e menor carga de JS no cliente.
 - **Tailwind CSS**: Estilização rápida e consistente com CSS otimizado.
 - **shadcn/ui**: Componentes acessíveis e modernos sem vendor lock-in.
+- **Axios**: Cliente HTTP para comunicação performática com o backend.
 
 ### 📊 Visualização de Dados
 
@@ -55,6 +57,15 @@ A aplicação segue uma arquitetura **full-stack desacoplada**, dividida em:
 - `lucide-react`: Iconografia.
 - `clsx` & `tailwind-merge`: Utilidades de CSS.
 - `next-themes`: Gestão de temas (Dark Mode).
+- `sonner`: Sistema de notificações (Toasts) de alta qualidade.
+- `js-cookie`: Manipulação segura de tokens no cliente.
+
+### 🧪 Qualidade e Infraestrutura
+
+- **Jest & Supertest**: Suíte de testes unitários e integração (Backend).
+- **React Testing Library**: Validação de comportamento de componentes (Frontend).
+- **Playwright**: Testes E2E com gravação de jornada do usuário.
+- **Docker & Docker Compose**: Containerização e orquestração completa do ambiente.
 
 ---
 
@@ -63,9 +74,10 @@ A aplicação segue uma arquitetura **full-stack desacoplada**, dividida em:
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | POST   | `/auth/token`           | Autenticação e retorno do JWT |
+| GET    | `/summary`              | Dados agregados do dashboard |
+| GET    | `/inconsistencies`      | Lista detalhada de lacunas de dados |
 | GET    | `/children`             | Lista com filtros e paginação |
 | GET    | `/children/:id`         | Detalhe completo da criança |
-| GET    | `/summary`              | Dados agregados do dashboard |
 | PATCH  | `/children/:id/review`  | Registra revisão técnica |
 
 ---
@@ -193,6 +205,9 @@ A suíte de testes E2E está configurada para realizar a **Jornada Completa do T
 - Validação visual da alternância para o **Modo Dark**.
 
 Ao final de cada execução, o Playwright gera automaticamente um **vídeo da interação**, localizado em `frontend/test-results`, permitindo validar a experiência do usuário de forma visual e auditável.
+
+#### 🎬 Demonstração da Jornada (E2E)
+![Demonstração E2E](https://via.placeholder.com/800x450.png?text=Link+do+seu+GIF+aqui)
 
 ---
 
