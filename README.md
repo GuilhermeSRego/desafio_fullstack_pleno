@@ -45,8 +45,9 @@ A aplicação segue uma arquitetura **full-stack desacoplada**, dividida em:
 
 ### 📊 Visualização de Dados
 
-- **Recharts**: Gráficos responsivos (Bar, Donut, Radar).
-- **Leaflet + Marker Cluster**: Mapa interativo com agrupamento (base para heatmap).
+- **Recharts**: Gráficos responsivos (Bar, Donut, Radar comparativo por bairro).
+- **Leaflet + Marker Cluster**: Mapa interativo com agrupamento e visualização de densidade.
+- **react-joyride**: Sistema de onboarding guiado com persistência de estado.
 
 ### 🧰 Bibliotecas Auxiliares
 
@@ -96,6 +97,12 @@ Inconsistências aparecem como um overlay visual pulsante sobre a barra.
 ### 🏫 Filtro por Escolas
 Filtro multi-select que permite organizar o trabalho de campo por instituição de ensino.
 
+### 🧭 Onboarding Guiado (Tour)
+Sistema de ajuda interativo que guia o novo técnico pelas principais funcionalidades:
+- **Persistência**: O tour lembra em qual passo você parou, mesmo se mudar de página ou recarregar o navegador.
+- **Contextual**: Explicações específicas para cada tela (Dashboard, Lista e Prontuário).
+- **Acesso Rápido**: Botão de ajuda permanente na Navbar para reiniciar o tour a qualquer momento.
+
 ---
 
 ## 📱 Responsividade e UX
@@ -142,6 +149,9 @@ Filtro multi-select que permite organizar o trabalho de campo por instituição 
 - **Login**: `tecnico@prefeitura.rio`
 - **Senha**: `painel@2024`
 
+> [!TIP]
+> **Reset de Experiência**: Para simular um primeiro acesso e ver o Tour de boas-vindas novamente, abra o console do navegador e execute: `localStorage.clear(); location.reload();`
+
 ---
 
 ## 📊 Status de Implementação
@@ -154,7 +164,8 @@ Filtro multi-select que permite organizar o trabalho de campo por instituição 
 - [x] Mapa de calor e agrupamento de marcadores
 - [x] Edição de dados com atualização de status em tempo real
 - [x] Registro de revisão técnica
-- [x] Responsividade completa
+- [x] Onboarding guiado e interativo (Tour)
+- [x] Responsividade completa (375px a 1440px)
 - [x] Dark Mode e Acessibilidade (WCAG AA)
 
 ---
